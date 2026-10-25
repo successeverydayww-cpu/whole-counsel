@@ -188,6 +188,18 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .ringbell{font-size:56px;animation:pulse 1.1s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
 .fullpage{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;padding:10px 14px 90px}
+.hub3{display:flex;gap:10px;margin-top:14px}
+.hubc{flex:1;background:rgba(242,201,76,.08);border:1px solid rgba(242,201,76,.25);border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer}
+.hubc .n{font-size:22px;font-weight:800;color:var(--gold2)}
+.hubc .l{font-size:12px;color:#cfe8db;margin-top:2px}
+.tick{color:#4fae83;font-size:11px;margin-right:3px}
+.tick.on{color:var(--gold2)}
+#menu-drop{position:fixed;top:58px;right:10px;z-index:200;background:#183b33;border:1px solid rgba(242,201,76,.25);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);min-width:240px;padding:6px;animation:dropIn .14s ease}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.mditem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border:none;background:none;color:#e9f6ee;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit}
+.mditem:hover,.mditem:active{background:rgba(242,201,76,.12)}
+.mdsplit{height:1px;background:rgba(255,255,255,.1);margin:4px 8px}
+.hdrav{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--gold2)}
 .flwrap{max-width:640px;margin:0 auto}
 .bres{display:flex;align-items:center;gap:10px;padding:11px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
 .bres .bi{width:38px;height:38px;border-radius:10px;background:rgba(242,201,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}
@@ -347,12 +359,13 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <!-- MAIN -->
 <div id="main" class="hidden">
   <div class="tophead">
-    <div class="mini">📖</div>
+    <div class="mini" id="hdr-logo">📖</div>
     <div class="tt"><div class="h">The Whole Counsel</div><div class="s" id="hdr-email"></div></div>
     <button class="iconbtn" id="btn-pace" title="Daily pace">⚙</button>
     <button class="iconbtn" id="btn-menu" title="Menu">⋮</button>
   </div>
 
+  <div id="menu-drop" class="hidden"></div>
   <div id="view-home" class="fade">
     <div class="card daycard hidden" id="ann-banner" style="cursor:pointer">
       <div class="day">📣 Announcement from your fellowship</div>
@@ -371,6 +384,11 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
       <span style="font-size:26px">📚</span>
       <span style="flex:1"><b>Get e-books</b><br><span style="font-size:12px;color:#9ec9b4">Free classic Christian library — search, download, read inside</span></span>
       <span style="color:var(--gold2)">→</span>
+    </div>
+    <div class="card daycard hidden" id="home-sub-card" style="cursor:pointer">
+      <div class="day">✨ Membership</div>
+      <div class="hint" id="home-sub-line" style="margin-top:6px">—</div>
+      <button class="btn" id="home-sub-btn" style="width:100%;margin-top:10px">Become a member</button>
     </div>
     <div class="card">
       <div class="prog">
@@ -449,7 +467,12 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <button class="iconbtn" id="fl-menu">⋮</button>
   </div>
 
-  <div id="grp-none" class="flwrap">
+  <div id="fl-start" class="flwrap">
+    <div class="card daycard" id="fl-mine-card" style="cursor:pointer;margin-top:8px">
+      <div class="day">Your fellowship</div>
+      <div class="ref" id="fl-mine-name">—</div>
+      <div class="hint" id="fl-mine-sub" style="margin-top:4px">Tap to open</div>
+    </div>
     <div class="card daycard">
       <div class="day">Fellowship</div>
       <div class="lockcard" style="margin-top:8px">Read the whole counsel together — encouragement, not competition. Create a fellowship or join one with a code.</div>
@@ -475,19 +498,22 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
   </div>
 
-  <div id="fl-chat" class="hidden flwrap">
+  <div id="fl-hub" class="hidden flwrap">
     <div class="card daycard" style="margin-top:8px">
       <div class="ref" id="grp-name-show">—</div>
       <div class="hint" id="fl-subline" style="margin-top:4px">—</div>
-      <div id="fl-note-strip" class="gnote hidden" style="margin-top:10px"></div>
-      <div class="gtrow" style="margin-top:10px">
-        <button class="btn" id="fl-videos-btn">📺 Videos</button>
-        <button class="btn" id="fl-ann-btn">📣 Announcements</button>
-        <button class="btn" id="fl-members-btn">👥 Members</button>
+      <div id="fl-note-strip" class="gnote hidden" style="margin-top:10px;cursor:pointer" onclick="flGo('ann')"></div>
+      <div class="hub3">
+        <div class="hubc" id="hb-chat"><div class="n" id="hb-chat-n">0</div><div class="l">💬 Chats</div></div>
+        <div class="hubc" id="hb-videos"><div class="n" id="hb-videos-n">0</div><div class="l">📺 Videos</div></div>
+        <div class="hubc" id="hb-members"><div class="n" id="hb-members-n">0</div><div class="l">👥 Members</div></div>
       </div>
       <div id="grp-prayer-line" class="hint" style="margin-top:12px">🙏 Prayer time: not set</div>
       <div id="grp-prayer-missed" class="gpinned hidden" style="margin-top:10px"></div>
     </div>
+  </div>
+
+  <div id="fl-chat" class="hidden flwrap">
     <div id="grp-pinned" class="gpinned hidden"></div>
     <div class="gmsgs" id="gmsgs"><div class="chload">Loading…</div></div>
     <div class="greplybar hidden" id="greply-bar"><span id="greply-txt"></span><span class="x" id="greply-x">✕</span></div>
@@ -498,12 +524,24 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
   </div>
 
   <div id="fl-videos" class="hidden flwrap">
-    <div id="gv-post" class="card gform hidden">
-      <label style="margin-top:0">Post a video (leaders)</label>
-      <input id="gv-link" placeholder="Paste a YouTube link">
-      <button class="btn" id="gv-btn">📺 Post video</button>
-    </div>
+    <button class="btn hidden" id="fl-upload-open" style="width:100%;margin-bottom:12px">📤 Upload video</button>
     <div id="gv-list"></div>
+  </div>
+
+  <div id="fl-upload" class="hidden flwrap">
+    <div class="card gform">
+      <label style="margin-top:0">Share a video by link</label>
+      <input id="gv-link" placeholder="Paste a YouTube link">
+      <button class="btn" id="gv-btn">📺 Post video link</button>
+    </div>
+    <div class="card gform">
+      <label style="margin-top:0">Upload from your phone</label>
+      <input type="file" id="gv-file" accept="video/*" style="width:100%;padding:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;color:#d8efe2">
+      <div class="hint" id="gv-fname" style="margin-top:6px"></div>
+      <div class="track" style="margin:8px 0"><div id="gv-prog" style="width:0%;background:var(--gold2);height:100%;border-radius:6px"></div></div>
+      <button class="btn" id="gv-upload-btn" style="width:100%">📤 Upload video</button>
+      <div class="hint" style="margin-top:8px">Up to 95MB — sermons, classes, worship.</div>
+    </div>
   </div>
 
   <div id="fl-ann" class="hidden flwrap">
@@ -539,6 +577,11 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
       <label style="margin-top:0">Members & admins</label>
       <div id="grp-list"></div>
       <div class="hint">Chapters of the Bible read, out of 1,189 · tap a member for options.</div>
+    </div>
+    <div class="card hidden" id="fl-removed-card">
+      <label style="margin-top:0">Removed members</label>
+      <div id="fl-removed-list"></div>
+      <div class="hint" style="margin-top:8px">Removed members need an invite-back code (IB-…) from you to return.</div>
     </div>
     <div class="card">
       <div class="backlnk" id="grp-leave" style="color:#d69d69">Leave fellowship</div>
@@ -599,6 +642,9 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="greet">You</div>
     <div class="card daycard">
       <div class="meav" id="me-av">—</div>
+      <input type="file" id="me-photo-in" accept="image/*" class="hidden">
+      <button class="btn" id="me-photo-btn" style="width:100%;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35)">📷 Upload profile picture</button>
+      <div class="hint" style="margin-top:6px">Your picture shows on the home page, in place of the 📖.</div>
       <input id="me-name" maxlength="30" placeholder="Your display name">
       <button class="btn" id="me-save" style="margin-top:8px">Save name</button>
       <div class="hint" id="me-email" style="margin-top:10px">—</div>
@@ -626,25 +672,32 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
       <div id="me-sub-line" style="font-size:14px;margin:6px 0 10px">—</div>
       <button class="btn" id="me-sub-btn" style="width:100%">✨ Become a member</button>
     </div>
-    <div id="me-admin" class="hidden">
-      <div class="card">
-        <label style="margin-top:0">Admin dashboard</label>
-        <div class="adrow">
-          <div class="adstat"><b id="ad-users">0</b><span>readers</span></div>
-          <div class="adstat"><b id="ad-subs">0</b><span>members</span></div>
-          <div class="adstat"><b id="ad-pend">0</b><span>pending</span></div>
-        </div>
-        <input id="ad-q" placeholder="Search users by name or email…">
-        <div id="ad-users-list"></div>
-      </div>
-      <div class="card">
-        <label style="margin-top:0">Subscription requests</label>
-        <div id="ad-pend-list"><div class="hint">None pending.</div></div>
-      </div>
+    <div class="card">
+      <label style="margin-top:0">Admin</label>
+      <div class="hint" style="margin:6px 0">The owner dashboard lives in the ⋮ menu.</div>
     </div>
     <div class="card">
       <button class="btn" id="me-logout" style="width:100%;background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)">Log out</button>
       <div class="backlnk" id="me-del" style="color:#d69d69;margin-top:12px">Delete my account</div>
+    </div>
+  </div>
+
+  <div id="view-admin" class="hidden fade">
+    <div class="rd-top"><button class="iconbtn" id="ad-back">←</button><div class="t">Admin dashboard</div></div>
+    <div class="greet">The numbers</div>
+    <div class="sub">Only you can see this page.</div>
+    <div class="card">
+      <div class="adrow">
+        <div class="adstat"><b id="ad-users">0</b><span>readers</span></div>
+        <div class="adstat"><b id="ad-subs">0</b><span>members</span></div>
+        <div class="adstat"><b id="ad-pend">0</b><span>pending</span></div>
+      </div>
+      <input id="ad-q" placeholder="Search users by name or email…">
+      <div id="ad-users-list"></div>
+    </div>
+    <div class="card">
+      <label style="margin-top:0">Subscription requests</label>
+      <div id="ad-pend-list"><div class="hint">None pending.</div></div>
     </div>
   </div>
 
@@ -694,7 +747,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v5.1';
+const APPVER='whole-counsel v6.1';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -897,15 +950,25 @@ async function enter(){
     }
   }).catch(()=>{});
 }
-$('btn-menu').onclick=()=>{
-  menuSheet('The Whole Counsel',[
+function closeMenuDrop(){ $('menu-drop').classList.add('hidden'); $('menu-drop').innerHTML=''; }
+$('btn-menu').onclick=(ev)=>{
+  ev.stopPropagation();
+  const d=$('menu-drop');
+  if(!d.classList.contains('hidden')){closeMenuDrop();return}
+  const items=[
     {label:'👤 Profile & settings',fn:()=>navTo('me')},
     {label:'✨ Membership & payment',fn:()=>navTo('sub')},
     {label:'⚙ Daily reading pace',fn:()=>navTo('home')},
-    {label:'⏻ Log out',fn:()=>{if(confirm('Log out of The Whole Counsel?')){localStorage.removeItem(LS_T);token='';location.reload()}}}
-  ]);
+  ];
+  if(me.role==='owner')items.push({label:'🛡 Admin dashboard',fn:()=>navTo('admin')});
+  items.push({label:'⏻ Log out',fn:()=>{if(confirm('Log out of The Whole Counsel?')){localStorage.removeItem(LS_T);token='';location.reload()}}});
+  d.innerHTML=items.map((it,i)=>'<button class="mditem" data-mi="'+i+'">'+it.label+'</button>').join('');
+  d.classList.remove('hidden');
+  d.querySelectorAll('[data-mi]').forEach(b=>b.onclick=()=>{const it=items[Number(b.dataset.mi)];closeMenuDrop();it.fn()});
 };
+document.addEventListener('click',e=>{const d=$('menu-drop');if(d&&!d.classList.contains('hidden')&&!d.contains(e.target)&&e.target!==$('btn-menu'))closeMenuDrop()});
 $('me-back').onclick=()=>{stopTTS();navTo('home')};
+$('ad-back').onclick=()=>navTo('home');
 
 /* ============ sync ============ */
 let syncT;
@@ -1148,8 +1211,11 @@ async function pollChat(){
   chat.hash=h;
   chat.msgs=r.group.messages||[];chat.role=r.group.role||'member';chat.prayerTime=r.group.prayerTime;
   chat.myLang=r.group.myLang||'en';chat.unread=r.group.unread||0;chat.lastPrayer=r.group.lastPrayer;
+  chat.stats=r.group.stats||{};chat.firstSeen=r.group.firstSeen||0;
   if($('grp-lang').options.length)$('grp-lang').value=chat.myLang;
-  renderChat();renderVideos();
+  renderChat();
+  if(flScreen==='videos'||flScreen==='hub')renderVideos();
+  renderFellow();
   if(!document.getElementById('view-fellow').classList.contains('hidden')){
     const maxId=chat.msgs.length?chat.msgs[chat.msgs.length-1].id:0;
     if(maxId){api({act:'gSeen',token,last_id:maxId}).catch(()=>{});}
@@ -1169,17 +1235,29 @@ function renderFellow(){
   if(!document.getElementById('view-fellow').classList.contains('hidden'))renderAnnBanner();
   const locked=!isMember();
   show('grp-locked',locked);
-  show('grp-none',!locked&&!myGroup);
-  show('fl-chat',!locked&&!!myGroup&&flScreen!=='ann'&&flScreen!=='members'&&flScreen!=='videos');
-  show('fl-videos',!locked&&!!myGroup&&flScreen==='videos');
-  show('fl-ann',!locked&&!!myGroup&&flScreen==='ann');
-  show('fl-members',!locked&&!!myGroup&&flScreen==='members');
-  if(!myGroup)return;
-  $('fl-title').textContent=flScreen==='chat'?myGroup.name:flScreen==='ann'?'Announcements':flScreen==='members'?'Members':'Group videos';
+  const inStart=!locked&&flScreen==='start';
+  const inGroup=!locked&&!!myGroup&&!inStart;
+  show('fl-start',inStart);
+  show('fl-hub',inGroup&&flScreen==='hub');
+  show('fl-chat',inGroup&&flScreen==='chat');
+  show('fl-videos',inGroup&&flScreen==='videos');
+  show('fl-upload',inGroup&&flScreen==='upload');
+  show('fl-ann',inGroup&&flScreen==='ann');
+  show('fl-members',inGroup&&flScreen==='members');
+  if(locked)return;
+  show('fl-mine-card',!!myGroup);
+  if(!myGroup){flGo('start');return}
+  $('fl-title').textContent=flScreen==='start'?'Fellowship':flScreen==='hub'?myGroup.name:flScreen==='chat'?'Chats':flScreen==='videos'?'Group videos':flScreen==='upload'?'Upload video':flScreen==='ann'?'Announcements & schedule':'Members & admins';
+  $('fl-mine-name').textContent=myGroup.name;
+  $('fl-mine-sub').textContent='Code '+myGroup.code+' · '+((chat.stats&&chat.stats.members)||gMembers.length||'…')+' members — tap to open';
   $('grp-name-show').textContent=myGroup.name;
   $('grp-code-show').textContent='Fellowship code: '+myGroup.code;
+  const stats=chat.stats||{};
+  $('hb-chat-n').textContent=stats.chats||chat.msgs.length||0;
+  $('hb-videos-n').textContent=stats.videos||chat.msgs.filter(m=>m.kind==='video').length||0;
+  $('hb-members-n').textContent=stats.members||gMembers.length||0;
   const sub=[];
-  sub.push((gMembers.length||'…')+' member'+(gMembers.length===1?'':'s'));
+  sub.push((stats.members||gMembers.length||'…')+' member'+((stats.members||gMembers.length)===1?'':'s'));
   sub.push('code '+myGroup.code);
   $('fl-subline').textContent=sub.join(' · ');
   const notes=myGroup.notes||[];
@@ -1221,7 +1299,7 @@ function renderChat(){
       +rep
       +((body?('<div>'+body+'</div>'):'')+trh)
       +'<div class="gacts">'+rx+'</div>'
-      +'<div class="gtime">'+hm(m.created)+'</div></div>';
+      +'<div class="gtime">'+(m.you?('<span class="tick'+(((chat.firstSeen||0)>=m.id)?' on':'')+'">'+(((chat.firstSeen||0)>=m.id)?'✓✓':'✓')+'</span>'):'')+hm(m.created)+'</div></div>';
   }
   box.innerHTML=h||'<div class="chload">No messages yet — say hello to the fellowship!</div>';
   box.querySelectorAll('.gmsg').forEach(el=>{
@@ -1271,17 +1349,20 @@ async function sendMsg(){
   pollChat();
 }
 function renderVideos(){
-  show('gv-post',chat.role!=='member');
+  show('fl-upload-open',chat.role!=='member');
   const vids=chat.msgs.filter(m=>m.kind==='video').reverse();
   const box=$('gv-list');
-  if(!vids.length){box.innerHTML='<div class="card"><div class="hint" style="text-align:center">No videos posted yet.</div></div>';return}
+  if(!vids.length){box.innerHTML='<div class="card"><div class="hint" style="text-align:center">No videos yet.</div></div>';return}
   let h='';
   for(const v of vids){
     const id=ytId(v.body);
     const dt=dsep(v.created)+' · '+hm(v.created);
-    h+='<div class="gvid">'+(id
+    const isR2=v.body.startsWith('r2:');
+    h+='<div class="gvid">'+(isR2
+      ?('<video controls preload="metadata" style="width:100%;border-radius:12px;background:#000" src="'+API+'v/'+encodeURIComponent(v.body.slice(3))+'"></video>')
+      :(id
       ?('<img src="https://i.ytimg.com/vi/'+id+'/hqdefault.jpg" data-yt="'+id+'" alt="video">')
-      :('<a href="'+escH(v.body)+'" target="_blank" rel="noopener" style="display:block;padding:18px;color:var(--gold2)">🔗 '+escH(v.body)+'</a>'))
+      :('<a href="'+escH(v.body)+'" target="_blank" rel="noopener" style="display:block;padding:18px;color:var(--gold2)">🔗 '+escH(v.body)+'</a>')))
       +'<div class="gvidmeta">📺 '+escH(v.name)+' · '+dt+'</div></div>';
   }
   box.innerHTML=h;
@@ -1293,6 +1374,37 @@ function renderVideos(){
     img.replaceWith(f);
   });
 }
+$('gv-file').onchange=()=>{
+  const f=$('gv-file').files[0];
+  $('gv-fname').textContent=f?(f.name||'video')+' · '+(f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB'):'';
+};
+$('gv-upload-btn').onclick=()=>{
+  const f=$('gv-file').files&&$('gv-file').files[0];
+  if(!f){toast('Choose a video from your phone first.');return}
+  if(f.size>95*1024*1024){toast('That video is over 95MB — trim it or share a link instead.');return}
+  const btn=$('gv-upload-btn');btn.disabled=true;btn.textContent='Uploading… 0%';
+  const xhr=new XMLHttpRequest();
+  xhr.open('POST',API+'uploadVideo');
+  xhr.upload.onprogress=e=>{
+    if(e.lengthComputable){const p=Math.round(e.loaded/e.total*100);btn.textContent='Uploading… '+p+'%';$('gv-prog').style.width=p+'%'}
+  };
+  xhr.onload=async()=>{
+    btn.disabled=false;btn.textContent='📤 Upload video';
+    let r=null;try{r=JSON.parse(xhr.responseText)}catch(e){}
+    if(xhr.status!==200||!r||!r.ok){toast(r&&r.error||'Upload failed.');$('gv-prog').style.width='0%';return}
+    const post=await api({act:'gSend',token,kind:'video',body:'r2:'+r.key}).catch(()=>null);
+    if(!post||!post.ok){toast(post&&post.error||'Could not post the video.');return}
+    toast('Video posted 📺');$('gv-prog').style.width='0%';$('gv-file').value='';$('gv-fname').textContent='';
+    chat.hash='';await pollChat();flGo('videos');
+  };
+  xhr.onerror=()=>{
+    btn.disabled=false;btn.textContent='📤 Upload video';
+    toast('Upload failed — check your connection.');
+  };
+  const fd=new FormData();
+  fd.append('token',token);fd.append('file',f);
+  xhr.send(fd);
+};
 $('gv-btn').onclick=async()=>{
   const u=$('gv-link').value.trim();if(!u){toast('Paste a YouTube link first');return}
   const r=await api({act:'gSend',token,body:u,kind:'video'}).catch(()=>null);
@@ -1301,12 +1413,56 @@ $('gv-btn').onclick=async()=>{
 };
 function renderMembers(){
   const list=$('grp-list');list.innerHTML='';
+  const leader=chat.role&&chat.role!=='member';
   [...(gMembers||[])].sort((a,b)=>b.chapters-a.chapters).forEach(m=>{
     const row=document.createElement('div');row.className='mrow';
+    row.style.position='relative';
     const ini=(m.name||'f').charAt(0).toUpperCase();
     const role=m.role==='owner'?'<span class="rolbad owner">OWNER</span>':m.role==='admin'?'<span class="rolbad admin">ADMIN</span>':'';
     row.innerHTML='<div class="av">'+ini+'</div><div class="nm"><div class="n">'+escH(m.name)+(m.you?'<small>you</small>':'')+role+'</div><div class="c">'+m.chapters+' of 1,189 chapters</div></div><div class="st2">🔥 '+m.streak+'</div>';
     if(!m.you&&chat.role==='owner')row.onclick=()=>memberSheet(m);
+    if(leader&&!m.you&&m.role!=='owner'&&(m.role==='member'||chat.role==='owner')){
+      const x=document.createElement('button');
+      x.textContent='✖';
+      x.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:#d69d69;font-size:15px;padding:8px;cursor:pointer';
+      x.onclick=async(ev)=>{
+        ev.stopPropagation();
+        if(!confirm('Remove '+m.name+' from the fellowship?\nThey will need an invite-back code to return.'))return;
+        const r=await api({act:'gRemove',token,uid:m.id}).catch(()=>null);
+        if(r&&r.ok){toast(m.name+' removed');loadGroup(true);loadRemoved()}
+        else toast(r&&r.error||'Could not remove.');
+      };
+      row.appendChild(x);
+    }
+    list.appendChild(row);
+  });
+}
+async function loadRemoved(){
+  const card=$('fl-removed-card');
+  if(!card)return;
+  if(chat.role==='member'){card.classList.add('hidden');return}
+  const r=await api({act:'gRemoved',token}).catch(()=>null);
+  if(!r||!r.ok){card.classList.add('hidden');return}
+  const list=$('fl-removed-list');
+  card.classList.remove('hidden');
+  if(!r.removed.length){list.innerHTML='<div class="hint">No removed members.</div>';return}
+  list.innerHTML='';
+  r.removed.forEach(m=>{
+    const row=document.createElement('div');row.className='mrow';row.style.position='relative';
+    row.innerHTML='<div class="av">'+(m.name||'f').charAt(0).toUpperCase()+'</div><div class="nm"><div class="n">'+escH(m.name)+'</div><div class="c">removed '+dsep(m.at)+'</div></div>';
+    const b=document.createElement('button');
+    b.className='btn';b.textContent='Invite back';
+    b.style.cssText='position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:7px 12px;font-size:12px';
+    b.onclick=async()=>{
+      const r2=await api({act:'gInviteBack',token,uid:m.id}).catch(()=>null);
+      if(!r2||!r2.ok){toast(r2&&r2.error||'Could not create code.');return}
+      menuSheet('Invite-back code for '+m.name,[
+        {label:'📋 Copy code '+r2.code,fn:()=>{try{navigator.clipboard.writeText(r2.code)}catch(e){}toast('Code copied')}},
+        {label:'📤 Send on WhatsApp',fn:()=>window.open('https://wa.me/?text='+encodeURIComponent('Your invite-back code for the fellowship: '+r2.code+' — open The Whole Counsel app and Join with code.'))},
+        {label:'Done',fn:()=>{}}
+      ]);
+    };
+    row.appendChild(b);
     list.appendChild(row);
   });
 }
@@ -1374,6 +1530,7 @@ $('proom-exit').onclick=async()=>{
   await api({act:'gRoom',token,join:false}).catch(()=>{});
 };
 $('grp-create').onclick=async()=>{
+  flScreen='hub';
   const name=$('grp-name').value.trim();
   if(name.length<2){toast('Give the fellowship a name.');return}
   $('grp-create').textContent='Creating…';
@@ -1388,7 +1545,8 @@ $('grp-join').onclick=async()=>{
   if(!code){toast('Enter the fellowship code.');return}
   const r=await api({act:'groupJoin',token,code});
   if(!r.ok){toast(r.error||'Could not join.');return}
-  toast('Joined '+r.name+' 🤝');
+  toast(r.welcomed?'Welcome back! You are restored to the fellowship 🙌':'Joined '+r.name+' 🤝');
+  flScreen='hub';
   loadGroup(true);
 };
 $('grp-code-show').onclick=async()=>{
@@ -1420,34 +1578,53 @@ function menuSheet(title,items){
 }
 function openFellow(){
   show('view-fellow',true);
-  flScreen='chat';
+  flScreen=myGroup?'hub':'start';
   renderFellow();
   markNotesSeen();
   chat.unread=0;updBadge();
 }
 function flGo(x){
   flScreen=x;
+  show('fl-start',x==='start');
+  show('fl-hub',x==='hub');
   show('fl-chat',x==='chat');
   show('fl-videos',x==='videos');
+  show('fl-upload',x==='upload');
   show('fl-ann',x==='ann');
   show('fl-members',x==='members');
-  $('fl-title').textContent=x==='videos'?'Group videos':x==='ann'?'Announcements & schedule':x==='members'?'Members & admins':(myGroup?myGroup.name:'Fellowship');
+  $('fl-title').textContent=
+    x==='start'?'Fellowship':
+    x==='hub'?(myGroup?myGroup.name:'Fellowship'):
+    x==='chat'?'Chats':
+    x==='videos'?'Group videos':
+    x==='upload'?'Upload video':
+    x==='ann'?'Announcements & schedule':
+    x==='members'?'Members & admins':'Fellowship';
   if(x==='ann')renderAnnPage();
-  if(x==='members')renderMembers();
+  if(x==='members'){renderMembers();loadRemoved()}
 }
 $('fl-back').onclick=()=>{
-  if(flScreen!=='chat'&&myGroup){flGo('chat');return}
-  show('view-fellow',false);
+  if(!myGroup){show('view-fellow',false);return}
+  if(flScreen==='start'){show('view-fellow',false);return}
+  if(flScreen==='hub'){flGo('start');return}
+  flGo('hub');
 };
+$('fl-mine-card').onclick=()=>flGo('hub');
+$('hb-chat').onclick=()=>flGo('chat');
+$('hb-videos').onclick=()=>flGo('videos');
+$('hb-members').onclick=()=>flGo('members');
+$('fl-upload-open').onclick=()=>flGo('upload');
 $('fl-menu').onclick=()=>{
   if(!myGroup)return;
   const items=[
+    {label:'💬 Chats',fn:()=>flGo('chat')},
+    {label:'📺 Group videos',fn:()=>flGo('videos')},
     {label:'👥 Members & admins',fn:()=>flGo('members')},
     {label:'📣 Announcements & schedule',fn:()=>flGo('ann')},
-    {label:'📺 Group videos',fn:()=>flGo('videos')},
     {label:'🙏 Prayer room',fn:()=>{closeSheet();joinRoom()}}
   ];
   if(chat.role!=='member'){
+    items.push({label:'📤 Upload video',fn:()=>flGo('upload')});
     items.push({label:'📣 Post announcement',fn:()=>{flGo('ann');setTimeout(()=>$('grp-note-add').click(),100)}});
     items.push({label:'📅 Set a schedule',fn:()=>{flGo('ann');setTimeout(()=>$('fl-sched').click(),100)}});
     items.push({label:'🙏 Set daily prayer time',fn:()=>{flGo('ann');$('grp-ptime').focus()}});
@@ -1457,9 +1634,6 @@ $('fl-menu').onclick=()=>{
   if(chat.role==='owner')items.push({label:'✖ Leave fellowship',fn:()=>$('grp-leave').click()});
   menuSheet(myGroup.name,items);
 };
-$('fl-videos-btn').onclick=()=>flGo('videos');
-$('fl-ann-btn').onclick=()=>flGo('ann');
-$('fl-members-btn').onclick=()=>flGo('members');
 function renderAnnPage(){
   const notes=(myGroup&&myGroup.notes)||[];
   const box=$('fl-ann-list');
@@ -1495,7 +1669,7 @@ function renderAnnBanner(){
 $('ann-banner').onclick=()=>openFellow();
 
 /* ============ membership: profile / subscribe / admin ============ */
-const me={name:'',subUntil:0,role:'member',payments:[],plans:null,acc:null,subTxn:null,subPlan:null};
+const me={name:'',subUntil:0,role:'member',payments:[],plans:null,acc:null,subTxn:null,subPlan:null,photo:null};
 const isMember=()=>me.role==='owner'||me.subUntil>Date.now();
 const fdate=ts=>new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
 async function loadMe(force){
@@ -1503,20 +1677,62 @@ async function loadMe(force){
   const r=await api({act:'subInfo',token}).catch(()=>null);
   if(!r||!r.ok)return;
   me.name=r.name||''; me.subUntil=r.subUntil||0; me.role=r.role||'member';
-  me.payments=r.payments||[]; me.plans=r.plans; me.acc=r.acc;
+  me.payments=r.payments||[]; me.plans=r.plans; me.acc=r.acc; me.photo=r.photo||null;
   renderMe();
   if(me.role==='owner'&&force)loadAdmin();
 }
+function paintUserPhoto(){
+  const lg=$('hdr-logo');
+  if(me.photo){lg.innerHTML='<img class="hdrav" src="'+me.photo+'">'}
+  else{lg.textContent='📖'}
+}
+function renderHomeSub(){
+  const card=$('home-sub-card');if(!card)return;
+  card.classList.remove('hidden');
+  const line=$('home-sub-line'),btn=$('home-sub-btn');
+  if(me.role==='owner'){line.textContent='👑 Owner — you have full access.';btn.textContent='View membership'}
+  else if(me.subUntil>Date.now()){line.innerHTML='✨ Member until <b>'+fdate(me.subUntil)+'</b>';btn.textContent='Manage membership'}
+  else{line.textContent='Unlock fellowship groups, word study and the full library.';btn.textContent='✨ Become a member'}
+  btn.onclick=(e)=>{e.stopPropagation();navTo('sub')};
+  card.onclick=()=>navTo('sub');
+}
+$('me-photo-btn').onclick=()=>$('me-photo-in').click();
+$('me-photo-in').onchange=()=>{
+  const f=$('me-photo-in').files&&$('me-photo-in').files[0];
+  if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const img=new Image();
+    img.onload=async()=>{
+      const c=document.createElement('canvas');
+      const s=240/Math.max(img.width,img.height);
+      c.width=Math.max(1,Math.round(img.width*s));c.height=Math.max(1,Math.round(img.height*s));
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const data=c.toDataURL('image/jpeg',.82);
+      if(data.length>160000){toast('That picture is too big — try a smaller one.');return}
+      const r=await api({act:'saveProfile',token,name:(me.name||'').trim(),photo:data}).catch(()=>null);
+      if(r&&r.ok){me.photo=r.photo||data;paintUserPhoto();renderMe();toast('Profile picture saved ✓')}
+      else toast(r&&r.error||'Could not save the picture.');
+    };
+    img.onerror=()=>toast('Could not read that image.');
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+};
 function renderMe(){
   const nm=(me.name||'').trim()||(email||'f').split('@')[0];
-  $('me-av').textContent=nm.charAt(0).toUpperCase();
+  paintUserPhoto();
+  const av=$('me-av');
+  if(me.photo){av.innerHTML='<img src="'+me.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'}
+  else{av.textContent=nm.charAt(0).toUpperCase()}
   $('me-name').value=me.name||'';
   $('me-email').textContent=email||'';
   const line=$('me-sub-line'), btn=$('me-sub-btn');
+  renderHomeSub();
   if(me.role==='owner'){line.textContent='👑 Owner — full access, always.';btn.classList.add('hidden')}
   else if(me.subUntil>Date.now()){line.innerHTML='✨ Member until <b>'+fdate(me.subUntil)+'</b>';btn.textContent='Extend membership';btn.classList.remove('hidden')}
   else{line.textContent='Free reader — reading is free forever.';btn.textContent='✨ Become a member';btn.classList.remove('hidden')}
-  show('me-admin',me.role==='owner');
+
 }
 $('me-save').onclick=async()=>{
   const r=await api({act:'setProfile',token,name:$('me-name').value.trim()}).catch(()=>null);
@@ -1839,7 +2055,8 @@ $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('ope
 
 /* ============ nav ============ */
 function navTo(v){
-  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');
+  if(v==='admin')loadAdmin();
   show('view-fellow',false);
   $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');
   if(v==='books')renderBooks();
