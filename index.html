@@ -181,8 +181,10 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .gday{align-self:center;font-size:11px;color:#9ec9b4;background:rgba(255,255,255,.08);border-radius:999px;padding:4px 12px;margin:8px 0 2px}
 .gtime{font-size:10px;opacity:.6;margin-top:3px}
 .ginbar{display:flex;gap:8px;margin-top:12px}
-.ginbar input{flex:1}
-.ginbar .btn{padding:10px 16px}
+.ginbar input,.libbar input{flex:1 1 auto;min-width:0;width:auto}
+.ginbar .btn,.libbar .btn{flex:0 0 auto;width:auto;min-width:54px;margin-top:0;padding:12px 18px}
+.libbar input{height:48px;border-radius:24px;padding:0 16px;font-size:16px;background:rgba(10,26,20,.96);border:1px solid rgba(242,201,76,.45)}
+.libbar{align-items:center}
 .greplybar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:7px 10px;margin-top:10px;font-size:12.5px}
 .greplybar .x{margin-left:auto;cursor:pointer;font-weight:800;color:var(--gold2)}
 .gvid{margin-top:10px;border-radius:14px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.15)}
@@ -221,6 +223,9 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .libbar{position:fixed;left:0;right:0;bottom:64px;padding:10px 12px;display:flex;gap:8px;background:linear-gradient(180deg,rgba(10,26,20,0),rgba(10,26,20,.92) 40%);z-index:60}
 #lib-in{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:24px;padding:11px 16px;color:#e9f6ee;font-size:14px}
 #menu-drop{position:fixed;top:58px;right:10px;z-index:200;background:#183b33;border:1px solid rgba(242,201,76,.25);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);min-width:240px;padding:6px;animation:dropIn .14s ease}
+#fl-drop{position:fixed;top:56px;right:10px;z-index:300;background:#183b33;border:1px solid rgba(242,201,76,.3);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.6);min-width:250px;max-width:calc(100vw - 20px);max-height:calc(100vh - 90px);overflow-y:auto;padding:6px;animation:dropIn .14s ease}
+#fl-drop .mdsep{height:1px;background:rgba(255,255,255,.1);margin:5px 8px}
+#fl-drop .mdhead{font-size:11px;font-weight:800;letter-spacing:.8px;color:var(--gold2);padding:8px 14px 4px;text-transform:uppercase}
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .mditem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border:none;background:none;color:#e9f6ee;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit}
 .mditem:hover,.mditem:active{background:rgba(242,201,76,.12)}
@@ -266,6 +271,8 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .mrow .nm .n small{color:var(--gold2);font-size:11px;margin-left:5px}
 .mrow .nm .c{font-size:11.5px;color:#9ec9b4;margin-top:2px}
 .mrow .st2{font-size:13px;font-weight:800;color:var(--gold2);white-space:nowrap}
+.ginbar input{height:48px;border-radius:24px;padding:0 16px;font-size:16px;background:rgba(10,26,20,.96);border:1px solid rgba(242,201,76,.45)}
+.ginbar .btn{border-radius:24px}
 </style>
 </head>
 <body>
@@ -416,6 +423,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
   </div>
 
   <div id="menu-drop" class="hidden"></div>
+  <div id="fl-drop" class="hidden"></div>
   <div id="view-home" class="fade">
     <div class="card daycard hidden" id="ann-banner" style="cursor:pointer">
       <div class="day">📣 Announcement from your fellowship</div>
@@ -737,7 +745,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="greet">The Librarian 📚</div>
     <div class="sub">Tell me any title, author or topic — I'll find the free ebook and drop it into your My Books.</div>
     <div id="lib-chat"></div>
-    <div class="libbar"><input id="lib-in" placeholder="e.g. Andrew Murray on prayer…" maxlength="300"><button class="btn" id="lib-send" style="border-radius:24px;padding:11px 18px">➤</button></div>
+    <div class="libbar"><input id="lib-in" placeholder="e.g. Andrew Murray on prayer…" maxlength="300"><button class="btn" id="lib-send" style="border-radius:24px">➤</button></div>
   </div>
 
   <div id="view-viva" class="hidden fade">
@@ -746,7 +754,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="sub">Your Bible teacher inside the app — ask anything, go as deep as you want.</div>
     <div id="viva-ctx"></div>
     <div id="viva-chat" class="lib-chatx" style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 160px"></div>
-    <div class="libbar"><input id="viva-in" placeholder="Ask anything about the Word…" maxlength="500"><button class="btn" id="viva-send" style="border-radius:24px;padding:11px 18px">➤</button></div>
+    <div class="libbar"><input id="viva-in" placeholder="Ask anything about the Word…" maxlength="500"><button class="btn" id="viva-send" style="border-radius:24px">➤</button></div>
   </div>
 
   <div id="view-admin" class="hidden fade">
@@ -824,7 +832,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.5';
+const APPVER='whole-counsel v6.7';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1769,26 +1777,44 @@ $('hb-chat').onclick=()=>flGo('chat');
 $('hb-videos').onclick=()=>flGo('videos');
 $('hb-members').onclick=()=>flGo('members');
 $('fl-upload-open').onclick=()=>flGo('upload');
-$('fl-menu').onclick=()=>{
-  if(!myGroup)return;
+function closeFlDrop(){const d=$('fl-drop');d.classList.add('hidden');d.innerHTML=''}
+$('fl-menu').onclick=(ev)=>{
+  ev.stopPropagation();
+  const d=$('fl-drop');
+  if(!d.classList.contains('hidden')){closeFlDrop();return}
+  if(!myGroup){
+    toast('Create or join a fellowship first');return;
+  }
   const items=[
+    {h:'Fellowship'},
     {label:'💬 Chats',fn:()=>flGo('chat')},
     {label:'📺 Group videos',fn:()=>flGo('videos')},
     {label:'👥 Members & admins',fn:()=>flGo('members')},
     {label:'📣 Announcements & schedule',fn:()=>flGo('ann')},
-    {label:'🙏 Prayer room',fn:()=>{closeSheet();joinRoom()}}
+    {label:'🙏 Prayer room',fn:()=>joinRoom()}
   ];
   if(chat.role!=='member'){
-    items.push({label:'📤 Upload video',fn:()=>flGo('upload')});
+    items.push({h:'Admin tools'});
+    items.push({label:'📤 Upload / post video',fn:()=>flGo('upload')});
     items.push({label:'📣 Post announcement',fn:()=>{flGo('ann');setTimeout(()=>$('grp-note-add').click(),100)}});
     items.push({label:'📅 Set a schedule',fn:()=>{flGo('ann');setTimeout(()=>$('fl-sched').click(),100)}});
-    items.push({label:'🙏 Set daily prayer time',fn:()=>{flGo('ann');$('grp-ptime').focus()}});
+    items.push({label:'🙏 Set daily prayer time',fn:()=>{flGo('ann');setTimeout(()=>$('grp-ptime').focus(),150)}});
   }
+  items.push({h:'Invite'});
   items.push({label:'📤 Share invite',fn:()=>$('grp-share').click()});
   items.push({label:'📋 Copy fellowship code',fn:()=>$('grp-copy2').click()});
-  if(chat.role==='owner')items.push({label:'✖ Leave fellowship',fn:()=>$('grp-leave').click()});
-  menuSheet(myGroup.name,items);
+  if(chat.role==='owner')items.push({sep:1},{label:'✖ Leave fellowship',fn:()=>$('grp-leave').click()});
+  let h='',idx=0;const act=[];
+  items.forEach(it=>{
+    if(it.h){h+='<div class="mdhead">'+it.h+'</div>';return}
+    if(it.sep){h+='<div class="mdsep"></div>';return}
+    h+='<button class="mditem" data-fi="'+idx+'">'+it.label+'</button>';act.push(it);idx++;
+  });
+  d.innerHTML=h;
+  d.classList.remove('hidden');
+  d.querySelectorAll('[data-fi]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();const it=act[Number(b.dataset.fi)];closeFlDrop();it.fn()});
 };
+document.addEventListener('click',e=>{const d=$('fl-drop');if(d&&!d.classList.contains('hidden')&&!d.contains(e.target)&&e.target!==$('fl-menu'))closeFlDrop()});
 function renderAnnPage(){
   const notes=(myGroup&&myGroup.notes)||[];
   const box=$('fl-ann-list');
