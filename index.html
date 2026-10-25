@@ -146,6 +146,14 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .wsBad.h{background:rgba(20,80,63,.8);color:#a9e3c8}
 .wsBad.g{background:rgba(217,169,43,.22);color:var(--gold2)}
 .wsOrig{font-size:26px;font-weight:800;margin:4px 0 2px;line-height:1.5}
+.wsSpeak{display:inline-flex;align-items:center;gap:6px;background:rgba(242,201,76,.14);border:1px solid rgba(242,201,76,.4);color:var(--gold2);border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:800;margin:6px 0 2px;cursor:pointer}
+.wsOcc{margin-top:10px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
+.wsOccN{font-size:14px;font-weight:800;color:var(--gold2)}
+.wsRefs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-height:230px;overflow-y:auto}
+.wsRef2{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:4px 9px;font-size:12px;cursor:pointer;color:#d8efe2}
+.wsRef2:hover{border-color:rgba(242,201,76,.5)}
+.wsRef2.hl{background:rgba(242,201,76,.25);border-color:var(--gold2)}
+.vflash{background:rgba(242,201,76,.18);border-radius:6px;box-shadow:0 0 0 4px rgba(242,201,76,.18);transition:box-shadow 1s}
 .wsTr{font-style:italic;color:#cfe8db;font-size:15px;margin-bottom:6px}
 .wsPos{font-size:12px;color:#9ec9b4;margin-bottom:6px}
 .wsDef{font-size:14px;line-height:1.55;color:#e8f5ee}
@@ -804,7 +812,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.3';
+const APPVER='whole-counsel v6.4';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1119,6 +1127,7 @@ function verseHTML(t,vn){
   }
   return html;
 }
+let pendingVerse=0;
 function renderChapter(vs){
   $('rd-title').textContent=chapters[cur.b].n+' '+cur.c;
   const box=$('rd-verses');box.innerHTML='';
@@ -1127,6 +1136,11 @@ function renderChapter(vs){
     p.innerHTML=verseHTML(t,i+1);
     box.appendChild(p);
   });
+  if(pendingVerse){
+    const vp=box.children[pendingVerse-1];
+    if(vp){vp.classList.add('vflash');setTimeout(()=>{vp.scrollIntoView({block:'center'});vp.classList.remove('vflash')},260)}
+    pendingVerse=0;
+  }
   box.querySelectorAll('.wd').forEach(el=>{el.onclick=()=>openWordSheet(el)});
   window.scrollTo(0,0);
   const gi=gIdx(cur.b,cur.c);
@@ -1189,6 +1203,72 @@ function prefetchLexicon(){
   ensureLexicon('H');
   setTimeout(()=>ensureLexicon('G'),4000);
 }
+const occData={};
+async function ensureOcc(letter){
+  if(occData[letter]!==undefined)return occData[letter];
+  try{
+    const r=await fetch('occ-'+letter.toLowerCase()+'.json');
+    if(!r.ok)throw 0;
+    occData[letter]=await r.json();
+  }catch(e){occData[letter]=null}
+  return occData[letter];
+}
+function speakWord(txt){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.rate=.8;u.pitch=1;
+    speechSynthesis.speak(u);
+  }catch(e){toast('Speech is not available on this device.')}
+}
+function refLabel(b,c,v){return chapters[b].n+' '+c+':'+v}
+function occSection(s){
+  const letter=s[0];
+  const isH=letter==='H';
+  const nums=isH?'the Old Testament (Hebrew)':'the New Testament (Greek)';
+  let h='<div class="wsOcc" id="ws-occ-'+s+'"><div class="chload" style="padding:4px 0">Counting every usage in Scripture…</div></div>';
+  return h;
+}
+async function loadOcc(s){
+  const box=$('ws-occ-'+s); if(!box)return;
+  const d=await ensureOcc(s[0]);
+  if(box && !$('ws-occ-'+s))return;
+  if(!d||!d[s]){if(box)box.innerHTML='<div class="wsUse">Usage list unavailable offline — the usage index loads once (about 1 MB) when you first open a word.</div>';return}
+  const refs=d[s].split(';').map(x=>x.split(':')).map(p=>[+p[0],+p[1],+p[2]]);
+  const n=refs.length;
+  const ot=isH(s)?n:0, nt=isH(s)?0:n;
+  let h='<div class="wsOccN">📊 Used '+n.toLocaleString()+' times in Scripture</div>'
+    +'<div class="wsUse" style="font-size:12.5px">Old Testament: <b>'+(isH?n.toLocaleString():0)+'</b> · New Testament: <b>'+(isH?0:n.toLocaleString())+'</b> · whole Bible: <b>'+n.toLocaleString()+'</b></div>'
+    +'<div class="wsRefs" id="ws-refs-'+s+'">';
+  const CAP=60;
+  refs.slice(0,CAP).forEach(r=>{h+='<span class="wsRef2" data-b="'+r[0]+'" data-c="'+r[1]+'" data-v="'+r[2]+'">'+escH(refLabel(r[0],r[1],r[2]))+'</span>'});
+  h+='</div>';
+  if(n>CAP)h+='<button class="wsSpeak" id="ws-more-'+s+'" style="margin-top:8px">Show all '+n.toLocaleString()+' places ▾</button>';
+  h+='<div class="wsUse" style="font-size:11.5px;margin-top:8px">Tap any reference to open that verse.</div>';
+  box.innerHTML=h;
+  const more=$('ws-more-'+s);
+  if(more)more.onclick=()=>{
+    const rb=$('ws-refs-'+s);
+    const frag=document.createElement('span');
+    let hh='';
+    refs.slice(CAP).forEach(r=>{hh+='<span class="wsRef2" data-b="'+r[0]+'" data-c="'+r[1]+'" data-v="'+r[2]+'">'+escH(refLabel(r[0],r[1],r[2]))+'</span>'});
+    rb.innerHTML+=hh;
+    more.remove();
+    bindRefs(rb);
+  };
+  bindRefs(box);
+}
+function bindRefs(scope){
+  scope.querySelectorAll('.wsRef2').forEach(el=>{
+    el.onclick=()=>{closeSheet();jumpVerse(+el.dataset.b,+el.dataset.c,+el.dataset.v)};
+  });
+}
+function isH(s){return s[0]==='H'}
+async function jumpVerse(b,c,v){
+  cur={b,c};
+  await openReader(b,c,true);
+  pendingVerse=v;
+}
 async function openWordSheet(el){
   if(!isMember()){
     $('sheet-inner').innerHTML='<h3>Word Study</h3><div class="wsWord" style="margin-top:8px">'+escH(el.textContent)+'</div><div class="lockcard" style="margin:10px 0 14px">🔒 The Hebrew & Greek Word Study is a members feature. Reading is free forever — membership unlocks every word in its original language.</div><div class="gtrow"><button class="btn" id="ws-sub">✨ Become a member</button></div>';
@@ -1211,14 +1291,15 @@ async function openWordSheet(el){
     if(!e){h+='<div class="wsEntry"><div class="wsDef">Strong\'s '+escH(s)+' — no lexicon entry.</div></div>';continue}
     const isH=s[0]==='H';
     h+='<div class="wsEntry">'
-      +'<span class="wsBad '+(isH?'h':'g')+'">'+(isH?'HEBREW · ':'GREEK · ')+escH(s)+'</span>'
+      +'<span class="wsBad '+(isH?'h':'g')+'">'+(isH?'HEBREW ROOT · ':'GREEK ROOT · ')+escH(s)+'</span>'
       +'<div class="wsOrig"'+(isH?' dir="rtl" lang="he"':' lang="el"')+'>'+escH(e.w)+'</div>'
-      +(e.t?'<div class="wsTr">'+escH(e.t)+'</div>':'')
-      +(e.p?'<div class="wsPos">'+escH(e.p)+'</div>':'')
-      +(e.d?'<div class="wsDef">'+escH(e.d)+'</div>':'')
-      +(e.r?'<div class="wsUse"><b>Root:</b> '+escH(e.r)+'</div>':'')
+      +(e.t?'<div class="wsTr"><b>'+escH(e.t)+'</b>'+(e.p?' · '+escH(e.p):'')+'</div>'
+        +'<button class="wsSpeak" id="ws-say-'+escH(s)+'">🔊 Hear it pronounced</button>':'')
+      +(e.d?'<div class="wsDef" style="margin-top:6px">'+escH(e.d)+'</div>':'')
+      +(e.r?'<div class="wsUse"><b>Root &amp; origin:</b> '+escH(e.r)+'</div>':'')
       +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
       +(e.u?'<div class="wsUse">'+escH(e.u)+'</div>':'')
+      +occSection(s)
       +'</div>';
   }
   const askTxt="Hello from The Whole Counsel. Teach me about the word '"+word+"' in "+ref+" (Strong's "+nums.join(', ')+
@@ -1227,6 +1308,11 @@ async function openWordSheet(el){
     encodeURIComponent(askTxt)+'" target="_blank" rel="noopener">🎓 Ask for deeper teaching</a>';
   h+='<div class="sheetsub">Strong\'s Exhaustive Concordance numbering · public-domain lexicon</div>';
   $('sheet-inner').innerHTML=h;
+  nums.forEach(s=>{
+    const say=$('ws-say-'+s);
+    if(say)say.onclick=()=>speakWord((lexicon[s]&&lexicon[s].t)||s);
+    loadOcc(s);
+  });
 }
 
 /* fellowship */
