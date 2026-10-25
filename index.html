@@ -140,6 +140,9 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .wd{font-weight:inherit;cursor:pointer;border-bottom:1px dotted rgba(242,201,76,.55);color:#f6e9c8}
 .wd:active{background:rgba(217,169,43,.18);border-radius:4px}
 .wsRef{font-size:12px;color:#9ec9b4;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}
+.vbadge{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#0b2b1c;background:linear-gradient(135deg,#37d68a,#1fae6a);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:2px}
+.vmeta{font-size:11.5px;color:#9ec9b4;margin-top:2px}
+.bres .btn.small{padding:8px 12px;font-size:12px;margin-top:0;width:auto;flex:0 0 auto}
 .wsWord{font-size:24px;font-weight:800;color:var(--gold2);margin-bottom:14px}
 .wsEntry{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px;margin-bottom:10px}
 .wsBad{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:1px;padding:3px 9px;border-radius:999px;margin-bottom:7px}
@@ -843,7 +846,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.8';
+const APPVER='whole-counsel v6.9';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1132,6 +1135,15 @@ async function enter(){
     }
   }).catch(()=>{});
 }
+const APP_LINK='https://successeverydayww-cpu.github.io/whole-counsel/';
+async function inviteFriends(){
+  const msg='Join me on The Whole Counsel — read the whole Bible with the Hebrew & Greek word study, a free Christian library and your fellowship group. '+APP_LINK;
+  try{
+    if(navigator.share){await navigator.share({title:'The Whole Counsel',text:msg,url:APP_LINK});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(msg);toast('Invite copied — paste it to a friend 🤝')}
+  catch(e){try{location.href='https://wa.me/?text='+encodeURIComponent(msg)}catch(x){toast('Open '+APP_LINK)}}
+}
 function closeMenuDrop(){ $('menu-drop').classList.add('hidden'); $('menu-drop').innerHTML=''; }
 $('btn-menu').onclick=(ev)=>{
   ev.stopPropagation();
@@ -1141,6 +1153,7 @@ $('btn-menu').onclick=(ev)=>{
     {label:'👤 Profile & settings',fn:()=>navTo('me')},
     {label:'✨ Membership & payment',fn:()=>navTo('sub')},
     {label:'⚙ Daily reading pace',fn:()=>navTo('home')},
+    {label:'🤝 Invite friends',fn:inviteFriends},
   ];
   if(me.role==='owner')items.push({label:'🛡 Admin dashboard',fn:()=>navTo('admin')});
   items.push({label:'⏻ Log out',fn:()=>{if(confirm('Log out of The Whole Counsel?')){localStorage.removeItem(LS_T);token='';location.reload()}}});
@@ -2224,8 +2237,18 @@ async function doSearch(){
   r.books.forEach(b=>{
     const row=document.createElement('div');row.className='bres';
     const have=mine[b.id];
-    row.innerHTML='<div class="bi">'+(have?'📕':'📖')+'</div><div class="bt"><div class="t1">'+escH(b.title)+'</div><div class="t2">'+escH(b.author)+(b.popular?' · '+(b.popular>999?(b.popular/1000).toFixed(1)+'k':b.popular)+' downloads':'')+'</div></div><button class="btn">'+(have?'Owned':'Get')+'</button>';
-    row.querySelector('button').onclick=()=>getEbook(b);
+    const meta=[];
+    if(b.pages)meta.push(b.pages+' pages');
+    if(b.pdfKB)meta.push('PDF '+((b.pdfKB>1024)?(b.pdfKB/1024).toFixed(1)+' MB':b.pdfKB+' KB'));
+    if(b.source)meta.push(b.source);
+    const pdfBtn=b.pdfUrl?'<button class="btn small" data-act="pdf" style="background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35)">⬇ PDF</button>':'';
+    row.innerHTML='<div class="bi">'+(have?'📕':'📖')+'</div><div class="bt"><div class="t1">'+escH(b.title)+'<span class="vbadge">✔ VERIFIED FULL BOOK</span></div>'
+      +'<div class="t2">by '+escH(b.author)+'</div>'
+      +(meta.length?'<div class="vmeta">'+escH(meta.join(' · '))+'</div>':'')
+      +'</div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">'+pdfBtn+'<button class="btn small">'+(have?'Owned':'Get')+'</button></div>';
+    const pb=row.querySelector('[data-act="pdf"]');
+    if(pb)pb.onclick=()=>{try{window.open(b.pdfUrl,'_blank','noopener')}catch(e){toast('Could not open the PDF.')}};
+    row.querySelector('.btn:not([data-act])').onclick=()=>getEbook(b);
     list.appendChild(row);
   });
 }
@@ -2251,7 +2274,7 @@ async function getEbook(b){
   const truncated=text.length>CAP;
   if(truncated)text=text.slice(0,CAP);
   const pages=Math.max(1,Math.ceil(text.length/9000));
-  mine[b.id]={id:b.id,title:r.title||b.title,author:r.author||b.author,text,pages,page:0,added:Date.now(),truncated};
+  mine[b.id]={id:b.id,title:r.title||b.title,author:r.author||b.author,text,pages,page:0,added:Date.now(),truncated,pdfUrl:b.pdfUrl||r.pdfUrl||null};
   booksSave(mine);
   toast('Saved to My Books 📕 ('+pages+' pages)');
   doSearchSilently();
@@ -2263,6 +2286,13 @@ function openEbook(id){
   const b=booksAll()[id];
   if(!b){toast('That book is gone.');navTo('ebooks');return}
   bk.cur=b;
+  try{
+    let dl=$('eb-pdf-dl');
+    if(b.pdfUrl){
+      if(!dl){dl=document.createElement('button');dl.id='eb-pdf-dl';dl.className='iconbtn';dl.textContent='⬇';dl.title='Download the full PDF';document.querySelector('#view-ebookread .rd-top').appendChild(dl)}
+      dl.onclick=()=>{try{window.open(b.pdfUrl,'_blank','noopener')}catch(e){toast('Could not open the PDF.')}};
+    }else if(dl)dl.remove();
+  }catch(e){}
   $('bk-title').textContent=b.title;
   $('bk-author').textContent='by '+b.author+(b.truncated?' · abridged for size':'');
   $('bk-st').textContent='—';
