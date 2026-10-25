@@ -153,7 +153,10 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .wsRef2{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:4px 9px;font-size:12px;cursor:pointer;color:#d8efe2}
 .wsRef2:hover{border-color:rgba(242,201,76,.5)}
 .wsRef2.hl{background:rgba(242,201,76,.25);border-color:var(--gold2)}
-.vflash{background:rgba(242,201,76,.18);border-radius:6px;box-shadow:0 0 0 4px rgba(242,201,76,.18);transition:box-shadow 1s}
+.vctx{display:inline-block;background:rgba(242,201,76,.12);border:1px solid rgba(242,201,76,.35);color:var(--gold2);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
+.vivaRef{color:var(--gold2);font-weight:700;border-bottom:1px dotted rgba(242,201,76,.6);cursor:pointer}
+.vsay{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--gold2);cursor:pointer;margin-top:6px;opacity:.85}
+.vivaRef, .vflash{background:rgba(242,201,76,.18);border-radius:6px;box-shadow:0 0 0 4px rgba(242,201,76,.18);transition:box-shadow 1s}
 .wsTr{font-style:italic;color:#cfe8db;font-size:15px;margin-bottom:6px}
 .wsPos{font-size:12px;color:#9ec9b4;margin-bottom:6px}
 .wsDef{font-size:14px;line-height:1.55;color:#e8f5ee}
@@ -475,7 +478,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
     <div class="rd-actions">
       <button class="btn" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)" id="rd-prev">← Previous</button>
-      <a class="btn" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14);text-decoration:none;text-align:center" id="rd-ask" href="#" target="_blank" rel="noopener">🎓 Ask</a>
+      <button class="btn" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)" id="rd-ask">🎓 Ask</button>
       <button class="btn" id="rd-next">Mark read → Next</button>
     </div>
   </div>
@@ -737,6 +740,15 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="libbar"><input id="lib-in" placeholder="e.g. Andrew Murray on prayer…" maxlength="300"><button class="btn" id="lib-send" style="border-radius:24px;padding:11px 18px">➤</button></div>
   </div>
 
+  <div id="view-viva" class="hidden fade">
+    <div class="rd-top"><button class="iconbtn" id="viva-back">←</button><div class="t">Ask Viva</div></div>
+    <div class="greet">Viva 🎓</div>
+    <div class="sub">Your Bible teacher inside the app — ask anything, go as deep as you want.</div>
+    <div id="viva-ctx"></div>
+    <div id="viva-chat" class="lib-chatx" style="display:flex;flex-direction:column;gap:10px;padding:14px 4px 160px"></div>
+    <div class="libbar"><input id="viva-in" placeholder="Ask anything about the Word…" maxlength="500"><button class="btn" id="viva-send" style="border-radius:24px;padding:11px 18px">➤</button></div>
+  </div>
+
   <div id="view-admin" class="hidden fade">
     <div class="rd-top"><button class="iconbtn" id="ad-back">←</button><div class="t">Admin dashboard</div></div>
     <div class="greet">The numbers</div>
@@ -812,7 +824,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.4';
+const APPVER='whole-counsel v6.5';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1145,9 +1157,8 @@ function renderChapter(vs){
   window.scrollTo(0,0);
   const gi=gIdx(cur.b,cur.c);
   $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
-  $('rd-ask').href='https://wa.me/19312715621?text='+encodeURIComponent(
-    "Hello from The Whole Counsel. Please teach me about "+chapters[cur.b].n+' '+cur.c+
-    " — the context, the key Hebrew/Greek words, and how it applies to my life today.");
+  const rdRef=chapters[cur.b].n+' '+cur.c;
+  $('rd-ask').onclick=()=>openViva('Chapter in view: '+rdRef);
 }
 $('rd-back').onclick=()=>{stopTTS();navTo('home');refreshHome()};
 $('rd-prev').onclick=()=>{stopTTS();stepChapter(-1)};
@@ -1302,10 +1313,9 @@ async function openWordSheet(el){
       +occSection(s)
       +'</div>';
   }
-  const askTxt="Hello from The Whole Counsel. Teach me about the word '"+word+"' in "+ref+" (Strong's "+nums.join(', ')+
-    "). What does the original word really mean, and how is it used across Scripture?";
-  h+='<a class="btn" style="text-decoration:none;text-align:center;margin-top:10px" href="https://wa.me/19312715621?text='+
-    encodeURIComponent(askTxt)+'" target="_blank" rel="noopener">🎓 Ask for deeper teaching</a>';
+  window.__vivaCtxWord="The reader tapped the English word '"+word+"' in "+ref+" (Strong's "+nums.join(', ')+
+    "). Lexicon: "+JSON.stringify(nums.map(n=>lexicon[n]).filter(Boolean)).slice(0,1500);
+  h+='<button class="btn" id="ws-viva" style="width:100%;margin-top:10px">🎓 Ask for deeper teaching</button>';
   h+='<div class="sheetsub">Strong\'s Exhaustive Concordance numbering · public-domain lexicon</div>';
   $('sheet-inner').innerHTML=h;
   nums.forEach(s=>{
@@ -1313,6 +1323,8 @@ async function openWordSheet(el){
     if(say)say.onclick=()=>speakWord((lexicon[s]&&lexicon[s].t)||s);
     loadOcc(s);
   });
+  const vv=$('ws-viva');
+  if(vv)vv.onclick=()=>{window.__vivaFrom='word';closeSheet();openViva(window.__vivaCtxWord||'')};
 }
 
 /* fellowship */
@@ -2197,6 +2209,70 @@ $('btn-pace').onclick=()=>{
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('open')};
 
 /* ============ nav ============ */
+/* ===== viva: in-app AI Bible teacher ===== */
+let vivaHist=[], vivaCtx='', bookSet=null;
+function vivaChipify(escText){
+  if(!bookSet)bookSet=new Set(chapters.map(x=>x.n));
+  return escText.replace(/([1-3]?\s?[A-Z][a-z]+)\s(\d{1,3}):(\d{1,3})/g,(m,bn,c,v)=>{
+    const clean=bn.replace(/\s+/g,' ').trim();
+    if(!bookSet.has(clean))return m;
+    const bi=chapters.findIndex(x=>x.n===clean);
+    if(bi<0)return m;
+    return '<span class="vivaRef" data-b="'+bi+'" data-c="'+c+'" data-v="'+v+'">'+m+'</span>';
+  });
+}
+function vivaBubble(who,text){
+  const d=document.createElement('div');
+  d.className='lb '+(who==='me'?'me':'ai');
+  d.innerHTML='<div class="who">'+(who==='me'?'You':'🎓 Viva')+'</div>'+(who==='me'?escH(text):vivaChipify(escH(text)));
+  if(who!=='me'){
+    const say=document.createElement('div');
+    say.className='vsay';say.textContent='🔊 Read aloud';
+    say.onclick=()=>speakWord(text);
+    d.appendChild(say);
+  }
+  $('viva-chat').appendChild(d);
+  d.scrollIntoView&&d.scrollIntoView({block:'end'});
+  return d;
+}
+function openViva(ctx){
+  if(!isMember()){ebLockSheet();return}
+  navTo('viva');
+  vivaCtx=ctx||'';
+  vivaHist=[];
+  $('viva-chat').innerHTML='';
+  $('viva-ctx').innerHTML=vivaCtx?'<div class="vctx">📚 '+escH(vivaCtx.slice(0,120))+'</div>':'';
+  vivaBubble('ai',"Shalom! I am Viva, your teacher inside The Whole Counsel. Ask me anything about this word, verse or passage — meaning, original language, how it is used across Scripture, or how to live it. Nothing here leaves the app.");
+}
+async function vivaSend(){
+  const t=$('viva-in').value.trim();
+  if(!t)return;
+  $('viva-in').value='';
+  vivaBubble('me',t);
+  vivaHist.push({role:'user',content:t});
+  $('viva-send').disabled=true;
+  const think=vivaBubble('ai','Opening the Scriptures… 📖');
+  const r=await api({act:'vivaAsk',token,text:t,history:vivaHist.slice(-8),ctx:vivaCtx}).catch(()=>null);
+  $('viva-send').disabled=false;
+  if(think&&think.parentNode)think.remove();
+  if(r&&r.members_only){navTo('home');ebLockSheet();return}
+  if(!r||!r.ok){vivaBubble('ai',(r&&r.error)||'I could not reach the teaching engine just now — try again in a moment.');return}
+  vivaBubble('ai',r.reply);
+  vivaHist.push({role:'assistant',content:r.reply});
+  $('viva-chat').querySelectorAll('.vivaRef:not([data-bd])').forEach(el=>{
+    if(el.dataset.bd)return;
+    el.dataset.bd='1';
+    el.onclick=()=>jumpVerse(+el.dataset.b,+el.dataset.c,+el.dataset.v);
+  });
+}
+$('viva-send').onclick=vivaSend;
+$('viva-in').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();vivaSend()}});
+$('viva-back').onclick=()=>{
+  const fromWord=window.__vivaFrom==='word';
+  window.__vivaFrom='';
+  navTo('reader');
+  if(fromWord){setTimeout(()=>{const sh=$('sheet');if(sh&&sh.classList)sh.classList.add('open')},80)}
+};
 function ebLockSheet(){
   $('sheet-inner').innerHTML='<h3>📚 E-books are for members</h3><div class="lockcard" style="margin:10px 0 14px">🔒 The free classic Christian library, the <b>AI Librarian</b> and <b>My Books</b> are <b>members only</b>. Reading the Bible stays free forever. Become a member to unlock e-books, Word Study and Fellowship.</div><div class="gtrow"><button class="btn" id="eb-lock-sub">✨ See membership benefits</button></div>';
   $('sheet').classList.add('open');
@@ -2261,8 +2337,8 @@ $('nv-mybooks').onclick=async()=>{
   setTimeout(()=>{const m=$('eb-mine');if(m){if(m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'start'});renderMyBooks();}},120);
 };
 function navTo(v){
-  if((v==='ebooks'||v==='ebookread'||v==='librarian')&&typeof isMember==='function'&&!isMember()){ebLockSheet();return}
-  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');show('view-librarian',v==='librarian');
+  if((v==='ebooks'||v==='ebookread'||v==='librarian'||v==='viva')&&typeof isMember==='function'&&!isMember()){ebLockSheet();return}
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');show('view-librarian',v==='librarian');show('view-viva',v==='viva');
   if(v==='admin')loadAdmin();
   if(v==='librarian')setTimeout(()=>{const li=$('lib-in');if(li)li.focus()},150);
   show('view-fellow',false);
