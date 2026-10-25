@@ -187,13 +187,20 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .ringbox{background:linear-gradient(160deg,#123f2c,#0b2b1e);border:1px solid rgba(242,201,76,.4);border-radius:22px;padding:26px 20px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .ringbell{font-size:56px;animation:pulse 1.1s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
-.fullpage{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;padding:10px 14px 90px}
+.fullpage{position:fixed;inset:0;z-index:70;background:radial-gradient(1200px 800px at 50% -10%,#0f4737 0%,#07281e 55%);background-color:#07281e;overflow-y:auto;padding:10px 14px 90px}
 .hub3{display:flex;gap:10px;margin-top:14px}
 .hubc{flex:1;background:rgba(242,201,76,.08);border:1px solid rgba(242,201,76,.25);border-radius:14px;padding:14px 6px;text-align:center;cursor:pointer}
 .hubc .n{font-size:22px;font-weight:800;color:var(--gold2)}
 .hubc .l{font-size:12px;color:#cfe8db;margin-top:2px}
 .tick{color:#4fae83;font-size:11px;margin-right:3px}
 .tick.on{color:var(--gold2)}
+#lib-chat{display:flex;flex-direction:column;gap:10px;padding:14px 4px 120px}
+.lb{max-width:86%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.lb.me{align-self:flex-end;background:rgba(242,201,76,.16);border:1px solid rgba(242,201,76,.3)}
+.lb.ai{align-self:flex-start;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.lb .who{font-size:11px;opacity:.65;margin-bottom:3px}
+.libbar{position:fixed;left:0;right:0;bottom:64px;padding:10px 12px;display:flex;gap:8px;background:linear-gradient(180deg,rgba(10,26,20,0),rgba(10,26,20,.92) 40%);z-index:60}
+#lib-in{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:24px;padding:11px 16px;color:#e9f6ee;font-size:14px}
 #menu-drop{position:fixed;top:58px;right:10px;z-index:200;background:#183b33;border:1px solid rgba(242,201,76,.25);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);min-width:240px;padding:6px;animation:dropIn .14s ease}
 @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 .mditem{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border:none;background:none;color:#e9f6ee;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit}
@@ -596,7 +603,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
       <input id="eb-q" placeholder="Title, author, or topic (prayer, faith, holiness…)">
       <button class="btn" id="eb-go" style="width:100%;margin-top:8px">🔎 Search</button>
       <div class="hint">Public-domain classics — legal, free, yours to keep offline.</div>
-      <a class="btn" id="eb-librarian" style="width:100%;margin-top:10px;text-decoration:none;text-align:center;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35);display:block" target="_blank" rel="noopener">📩 Can't find a book? Ask our librarian</a>
+      <a class="btn" id="eb-librarian" style="width:100%;margin-top:10px;text-decoration:none;text-align:center;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35);display:block">📚 Ask the Librarian — any book, found and delivered into My Books</a>
     </div>
     <div id="eb-results" class="card hidden">
       <label style="margin-top:0">Results</label>
@@ -682,6 +689,14 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
   </div>
 
+  <div id="view-librarian" class="hidden fade">
+    <div class="rd-top"><button class="iconbtn" id="lib-back">←</button><div class="t">Ask the Librarian</div></div>
+    <div class="greet">The Librarian 📚</div>
+    <div class="sub">Tell me any title, author or topic — I'll find the free ebook and drop it into your My Books.</div>
+    <div id="lib-chat"></div>
+    <div class="libbar"><input id="lib-in" placeholder="e.g. Andrew Murray on prayer…" maxlength="300"><button class="btn" id="lib-send" style="border-radius:24px;padding:11px 18px">➤</button></div>
+  </div>
+
   <div id="view-admin" class="hidden fade">
     <div class="rd-top"><button class="iconbtn" id="ad-back">←</button><div class="t">Admin dashboard</div></div>
     <div class="greet">The numbers</div>
@@ -736,6 +751,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <button id="nv-books"><span class="ic">📚</span>Books</button>
     <button id="nv-reader"><span class="ic">📖</span>Reader</button>
     <button id="nv-group"><span class="ic">🤝</span>Fellowship<span class="badge hidden" id="grp-badge"></span></button>
+    <button id="nv-mybooks"><span class="ic">📕</span>My Books</button>
   </nav>
 </div>
 
@@ -747,7 +763,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.1';
+const APPVER='whole-counsel v6.2';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1863,7 +1879,7 @@ async function renderMyBooks(){
   const mine=booksAll();
   const ids=Object.keys(mine);
   const box=$('eb-mine');
-  if(!ids.length){box.innerHTML='<div class="hint">Nothing yet — search and download a book above.</div>';return}
+  if(!ids.length){box.innerHTML='<div class="hint">Nothing yet — search above, or tap the 📚 Ask the Librarian button and I will find any book for you.</div>';return}
   box.innerHTML='';
   ids.sort((a,b)=>(mine[b].added||0)-(mine[a].added||0)).forEach(id=>{
     const b=mine[id];
@@ -1878,7 +1894,7 @@ $('eb-back').onclick=()=>{stopBkTTS();navTo('home')};
 $('bk-back').onclick=()=>{stopBkTTS();navTo('ebooks')};
 $('eb-librarian').onclick=()=>{
   const q=$('eb-q').value.trim();
-  window.open('https://wa.me/19312715621?text='+encodeURIComponent('Please find me the e-book: '+(q||'—')+' (from The Whole Counsel app)'));
+  openLibrarian(q?('Find me the e-book: '+q):'');
 };
 $('eb-go').onclick=doSearch;
 $('eb-q').onkeydown=e=>{if(e.key==='Enter')doSearch()};
@@ -1894,7 +1910,7 @@ async function doSearch(){
     if(r&&r.error&&r.error.includes('No books found')){
       const box=$('eb-results');box.classList.remove('hidden');
       $('eb-list').innerHTML='<div class="hint">No books found — try another word, or</div><button class="btn" id="eb-lib2" style="width:100%;margin-top:8px;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35)">📩 Ask our librarian to find it</button>';
-      $('eb-lib2').onclick=()=>window.open('https://wa.me/19312715621?text='+encodeURIComponent('Please find me the e-book: '+q+' (from The Whole Counsel app)'));
+      $('eb-lib2').onclick=()=>openLibrarian('Find me the e-book: '+q);
       return;
     }
     toast(r&&r.error||'Search failed. Check your connection.');return;
@@ -1904,7 +1920,7 @@ async function doSearch(){
   const list=$('eb-list');
   const mine=booksAll();
   list.innerHTML='';
-  if(!r.books.length){list.innerHTML='<div class="hint">No books found — try another word, or</div><button class="btn" id="eb-lib2" style="width:100%;margin-top:8px;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35)">📩 Ask our librarian to find it</button>';$('eb-lib2').onclick=()=>window.open('https://wa.me/19312715621?text='+encodeURIComponent('Please find me the e-book: '+q+' (from The Whole Counsel app)'));return}
+  if(!r.books.length){list.innerHTML='<div class="hint">No books found — try another word, or</div><button class="btn" id="eb-lib2" style="width:100%;margin-top:8px;background:rgba(242,201,76,.12);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.35)">📩 Ask our librarian to find it</button>';$('eb-lib2').onclick=()=>openLibrarian('Find me the e-book: '+q);return}
   r.books.forEach(b=>{
     const row=document.createElement('div');row.className='bres';
     const have=mine[b.id];
@@ -1926,8 +1942,8 @@ async function getEbook(b){
       if(!res.ok)throw new Error('blocked');
       text=await res.text();
     }catch(e){
-      toast('That copy is blocked — opening the librarian…');
-      window.open('https://wa.me/19312715621?text='+encodeURIComponent('Please find me the e-book: '+(b.title||'')+' by '+(b.author||'')+' (from The Whole Counsel app)'));
+      toast('That copy is blocked — asking the librarian…');
+      openLibrarian('The copy of "'+(b.title||'')+'" is blocked. Please find me another e-book: '+(b.title||'')+' by '+(b.author||''));
       return;
     }
   }
@@ -2054,11 +2070,67 @@ $('btn-pace').onclick=()=>{
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('open')};
 
 /* ============ nav ============ */
+/* ===== librarian chat ===== */
+let libHist=[];
+function openLibrarian(prefill){
+  navTo('librarian');
+  if(prefill){$('lib-in').value=prefill}
+  setTimeout(()=>$('lib-in').focus(),200);
+}
+function libScroll(){const c=$('lib-chat');if(c&&c.scrollIntoView)c.scrollIntoView({block:'end'});window.scrollTo&&window.scrollTo(0,document.body.scrollHeight)}
+function libBubble(who,text){
+  const d=document.createElement('div');
+  d.className='lb '+(who==='me'?'me':'ai');
+  d.innerHTML='<div class="who">'+(who==='me'?'You':'📚 Librarian')+'</div>'+escH(text);
+  $('lib-chat').appendChild(d);
+  libScroll();
+}
+function libBooks(books){
+  if(!books||!books.length)return;
+  const wrap=document.createElement('div');
+  wrap.style.cssText='align-self:flex-start;width:100%;display:flex;flex-direction:column;gap:8px';
+  books.forEach(b=>{
+    const row=document.createElement('div');row.className='bres';
+    const mine=booksAll()[b.id];
+    row.innerHTML='<div class="bi">📖</div><div class="bt"><div class="t1">'+escH(b.title)+'</div><div class="t2">'+escH(b.author)+'</div></div><button class="btn">'+(mine?'Read':'Get')+'</button>';
+    row.querySelector('button').onclick=()=>getEbook(b);
+    wrap.appendChild(row);
+  });
+  $('lib-chat').appendChild(wrap);
+  libScroll();
+}
+async function libSend(){
+  const t=$('lib-in').value.trim();
+  if(!t)return;
+  $('lib-in').value='';
+  libBubble('me',t);
+  libHist.push({role:'user',content:t});
+  $('lib-send').disabled=true;
+  libBubble('ai','Searching the shelves… 📚');
+  const r=await api({act:'libAsk',token,text:t,history:libHist.slice(-6)}).catch(()=>null);
+  $('lib-send').disabled=false;
+  const chat=$('lib-chat');
+  const thinking=[...chat.querySelectorAll('.lb.ai')].pop();
+  if(thinking&&thinking.textContent.includes('Searching the shelves'))thinking.remove();
+  if(!r||!r.ok){libBubble('ai',(r&&r.error)||'The library is unreachable right now — try again in a moment.');return}
+  libBubble('ai',r.reply);
+  libHist.push({role:'assistant',content:r.reply});
+  libBooks(r.books);
+}
+$('lib-send').onclick=libSend;
+$('lib-in').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();libSend()}});
+$('lib-back').onclick=()=>navTo('ebooks');
+$('nv-mybooks').onclick=async()=>{
+  stopTTS();
+  navTo('ebooks');
+  setTimeout(()=>{const m=$('eb-mine');if(m){if(m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'start'});renderMyBooks();}},120);
+};
 function navTo(v){
-  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');show('view-librarian',v==='librarian');
   if(v==='admin')loadAdmin();
+  if(v==='librarian')setTimeout(()=>{const li=$('lib-in');if(li)li.focus()},150);
   show('view-fellow',false);
-  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');
+  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');$('nv-mybooks').classList.toggle('on',v==='mybooks');
   if(v==='books')renderBooks();
   if(v==='me')loadMe(true);
   if(v==='sub')renderSub();
