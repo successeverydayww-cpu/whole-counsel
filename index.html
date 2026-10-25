@@ -136,6 +136,27 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:#123c2f;border:1px solid rgba(242,201,76,.5);color:#f2e9c9;padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;opacity:0;transition:.3s;pointer-events:none;z-index:60;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .chload{text-align:center;padding:30px 0;color:#bfe8d4;font-size:14px}
+.wd{font-weight:inherit;cursor:pointer;border-bottom:1px dotted rgba(242,201,76,.55);color:#f6e9c8}
+.wd:active{background:rgba(217,169,43,.18);border-radius:4px}
+.wsRef{font-size:12px;color:#9ec9b4;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase}
+.wsWord{font-size:24px;font-weight:800;color:var(--gold2);margin-bottom:14px}
+.wsEntry{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px;margin-bottom:10px}
+.wsBad{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:1px;padding:3px 9px;border-radius:999px;margin-bottom:7px}
+.wsBad.h{background:rgba(20,80,63,.8);color:#a9e3c8}
+.wsBad.g{background:rgba(217,169,43,.22);color:var(--gold2)}
+.wsOrig{font-size:26px;font-weight:800;margin:4px 0 2px;line-height:1.5}
+.wsTr{font-style:italic;color:#cfe8db;font-size:15px;margin-bottom:6px}
+.wsPos{font-size:12px;color:#9ec9b4;margin-bottom:6px}
+.wsDef{font-size:14px;line-height:1.55;color:#e8f5ee}
+.wsUse{font-size:12.5px;color:#bfe8d4;margin-top:6px;line-height:1.5}
+.gform input{margin-top:6px}
+.mrow{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);margin-top:8px}
+.mrow .av{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:linear-gradient(135deg,var(--em3),var(--em2));color:var(--gold2);border:1.5px solid rgba(242,201,76,.4)}
+.mrow .nm{flex:1;min-width:0}
+.mrow .nm .n{font-weight:700;font-size:15px}
+.mrow .nm .n small{color:var(--gold2);font-size:11px;margin-left:5px}
+.mrow .nm .c{font-size:11.5px;color:#9ec9b4;margin-top:2px}
+.mrow .st2{font-size:13px;font-weight:800;color:var(--gold2);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -172,6 +193,18 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="ico">🔥</div>
     <h2>Streaks that encourage, not shame</h2>
     <p>Every chapter you complete is remembered. Your streak counts your faithfulness, your progress bar shows how far you have come, and if you miss a day — <b>nothing breaks</b>. You simply continue. Grace is built in.</p>
+  </div>
+
+  <div class="lcard">
+    <div class="ico">🏺</div>
+    <h2>The original words, in your pocket</h2>
+    <p>Every word of Scripture is tappable. Touch any underlined word and the app opens its <b>original Hebrew or Greek</b> — the real word, its pronunciation, and its true meaning from the Strong's lexicon. Not a paraphrase. The origin.</p>
+  </div>
+
+  <div class="lcard">
+    <div class="ico">🤝</div>
+    <h2>Read it together — fellowship built in</h2>
+    <p>Create a fellowship, share the code, and your group reads the whole counsel together. See each other's progress and streaks — <b>to spur one another on</b>, never to shame. Perfect for a campus fellowship, a class, or a family.</p>
   </div>
 
   <div class="lcard">
@@ -291,10 +324,44 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="books" id="books-grid"></div>
   </div>
 
+  <div id="view-group" class="hidden fade">
+    <div class="greet">Fellowship</div>
+    <div class="sub">Read the whole counsel together — encouragement, not competition.</div>
+    <div id="grp-none">
+      <div class="card gform">
+        <label style="margin-top:0">Start a fellowship</label>
+        <input id="grp-name" maxlength="60" placeholder="e.g. CEF AKSU GROUP">
+        <button class="btn" id="grp-create">🤝 Create fellowship</button>
+        <div class="hint" style="margin-top:14px">You get a code. Share it and everyone reads the same Word, at their own pace.</div>
+      </div>
+      <div class="card gform">
+        <label style="margin-top:0">Join a fellowship</label>
+        <input id="grp-code-in" maxlength="20" placeholder="Enter the code, e.g. CEF-7K2Q" style="text-transform:uppercase">
+        <button class="btn ghost" id="grp-join">Join with code</button>
+      </div>
+    </div>
+    <div id="grp-have" class="hidden">
+      <div class="card daycard">
+        <div class="day">Reading together</div>
+        <div class="ref" id="grp-name-show">—</div>
+        <div style="font-size:13px;color:#cfe8db;margin-top:4px">Fellowship code</div>
+        <div id="grp-code-show" style="font-size:22px;font-weight:800;color:var(--gold2);cursor:pointer;letter-spacing:1px">—</div>
+        <div class="hint">Tap the code to copy and share it.</div>
+      </div>
+      <div class="card">
+        <label style="margin-top:0">Members</label>
+        <div id="grp-list"></div>
+        <div class="hint">Chapters of the Bible read, out of 1,189 · ranked by progress to spur one another on.</div>
+        <div class="backlnk" id="grp-leave" style="color:#d69d69">Leave fellowship</div>
+      </div>
+    </div>
+  </div>
+
   <nav class="bottom">
     <button id="nv-home" class="on"><span class="ic">🏠</span>Today</button>
     <button id="nv-books"><span class="ic">📚</span>Books</button>
     <button id="nv-reader"><span class="ic">📖</span>Reader</button>
+    <button id="nv-group"><span class="ic">🤝</span>Fellowship</button>
   </nav>
 </div>
 
@@ -306,7 +373,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v2.0';
+const APPVER='whole-counsel v3.0';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -470,6 +537,7 @@ function onAuthed(r){
   show('auth',false); show('landing',false); show('main',true); navTo('home');
   refreshHome();
   warmCache();
+  loadGroup(true);
   api({act:'load',token}).then(res=>{
     if(res.ok){
       const local=localStorage.getItem(LS_PR)||'';
@@ -575,14 +643,38 @@ async function openReader(b,c,fromToday){
     $('rd-verses').innerHTML='<div class="chload">Could not load this book. Check your connection and try again.</div>';
   }
 }
+const escH=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function verseHTML(t,vn){
+  let html='<span class="vn">'+vn+'</span>', ital=false;
+  for(const tk of t.replace(/<em>/g,'{I}').replace(/<\/em>/g,'{/I}').split(' ')){
+    if(!tk)continue;
+    for(const p of tk.split(/(\{\/?I\})/)){
+      if(p==='{I}'){html+='<i>';ital=true}
+      else if(p==='{/I}'){html+='</i>';ital=false}
+      else if(p){
+        const m=p.match(/^([^\[\]]+?)((?:\[[HG]\d+\])+)(.*)$/);
+        if(m){
+          const tags=m[2].match(/\[[HG]\d+\]/g).map(s=>s.slice(1,-1)).join('|');
+          const inner=escH(m[1]+m[3]);
+          html+='<b class="wd" data-s="'+tags+'">'+(ital?'<i>'+inner+'</i>':inner)+'</b> ';
+        }else{
+          const inner=escH(p);
+          html+=(ital?'<i>'+inner+'</i>':inner)+' ';
+        }
+      }
+    }
+  }
+  return html;
+}
 function renderChapter(vs){
   $('rd-title').textContent=chapters[cur.b].n+' '+cur.c;
   const box=$('rd-verses');box.innerHTML='';
   vs.forEach((t,i)=>{
     const p=document.createElement('p');
-    p.innerHTML='<span class="vn">'+(i+1)+'</span>'+t;
+    p.innerHTML=verseHTML(t,i+1);
     box.appendChild(p);
   });
+  box.querySelectorAll('.wd').forEach(el=>{el.onclick=()=>openWordSheet(el)});
   window.scrollTo(0,0);
   const gi=gIdx(cur.b,cur.c);
   $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
@@ -627,6 +719,99 @@ $('tts-play').onclick=()=>{
 $('tts-stop').onclick=()=>{stopTTS()};
 $('tts-speed').value=localStorage.getItem(LS_SPD)||'1';
 $('tts-speed').onchange=()=>{localStorage.setItem(LS_SPD,$('tts-speed').value)};
+/* word study */
+let lexicon=null, lexLoading=null;
+function ensureLexicon(){
+  if(lexicon)return Promise.resolve(true);
+  if(lexLoading)return lexLoading;
+  lexLoading=fetch('lexicon.json').then(r=>r.json()).then(j=>{lexicon=j;return true}).catch(()=>{lexLoading=null;return false});
+  return lexLoading;
+}
+async function openWordSheet(el){
+  const nums=el.dataset.s.split('|');
+  const word=el.textContent;
+  const ref=chapters[cur.b].n+' '+cur.c;
+  $('sheet-inner').innerHTML='<h3>Word study</h3><div class="wsRef">'+ref+' · tap a word with a gold underline</div><div class="wsWord">'+escH(word)+'</div><div class="chload">Loading lexicon…</div>';
+  $('sheet').classList.add('open');
+  const ok=await ensureLexicon();
+  if(!$('sheet').classList.contains('open'))return;
+  if(!ok){$('sheet-inner').innerHTML='<h3>Word study</h3><div class="chload">Could not load the lexicon. Check your connection.</div>';return}
+  let h='<h3>Word study</h3><div class="wsRef">'+ref+'</div><div class="wsWord">'+escH(word)+'</div>';
+  for(const s of nums){
+    const e=lexicon[s];
+    if(!e){h+='<div class="wsEntry"><div class="wsDef">Strong\'s '+escH(s)+' — no lexicon entry.</div></div>';continue}
+    const isH=s[0]==='H';
+    h+='<div class="wsEntry">'
+      +'<span class="wsBad '+(isH?'h':'g')+'">'+(isH?'HEBREW · ':'GREEK · ')+escH(s)+'</span>'
+      +'<div class="wsOrig"'+(isH?' dir="rtl" lang="he"':' lang="el"')+'>'+escH(e.w)+'</div>'
+      +(e.t?'<div class="wsTr">'+escH(e.t)+'</div>':'')
+      +(e.p?'<div class="wsPos">'+escH(e.p)+'</div>':'')
+      +(e.d?'<div class="wsDef">'+escH(e.d)+'</div>':'')
+      +(e.r?'<div class="wsUse"><b>Root:</b> '+escH(e.r)+'</div>':'')
+      +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
+      +(e.u?'<div class="wsUse">'+escH(e.u)+'</div>':'')
+      +'</div>';
+  }
+  h+='<div class="sheetsub">Strong\'s Exhaustive Concordance numbering · public-domain lexicon</div>';
+  $('sheet-inner').innerHTML=h;
+}
+
+/* fellowship */
+let myGroup=null, groupLoaded=false;
+async function loadGroup(force){
+  if(!token)return;
+  if(groupLoaded&&!force)return;
+  const r=await api({act:'groupFeed',token}).catch(()=>null);
+  if(!r||!r.ok)return;
+  myGroup=r.group; groupLoaded=true; renderGroup();
+}
+function renderGroup(){
+  if(myGroup){
+    show('grp-none',false);show('grp-have',true);
+    $('grp-name-show').textContent=myGroup.name;
+    $('grp-code-show').textContent=myGroup.code;
+    const list=$('grp-list');list.innerHTML='';
+    [...myGroup.members].sort((a,b)=>b.chapters-a.chapters).forEach(m=>{
+      const row=document.createElement('div');row.className='mrow';
+      const ini=(m.name||'f').charAt(0).toUpperCase();
+      row.innerHTML='<div class="av">'+ini+'</div><div class="nm"><div class="n">'+escH(m.name)+(m.you?'<small>you</small>':'')+'</div><div class="c">'+m.chapters+' of 1,189 chapters</div></div><div class="st2">🔥 '+m.streak+'</div>';
+      list.appendChild(row);
+    });
+  }else{
+    show('grp-none',true);show('grp-have',false);
+  }
+}
+$('grp-create').onclick=async()=>{
+  const name=$('grp-name').value.trim();
+  if(name.length<2){toast('Give the fellowship a name.');return}
+  $('grp-create').textContent='Creating…';
+  const r=await api({act:'groupCreate',token,name});
+  $('grp-create').textContent='🤝 Create fellowship';
+  if(!r.ok){toast(r.error||'Could not create.');return}
+  myGroup={code:r.code,name:r.name,members:[]};groupLoaded=false;
+  toast('Fellowship created 🙌');
+  loadGroup(true);
+};
+$('grp-join').onclick=async()=>{
+  const code=$('grp-code-in').value.trim().toUpperCase();
+  if(!code){toast('Enter the fellowship code.');return}
+  const r=await api({act:'groupJoin',token,code});
+  if(!r.ok){toast(r.error||'Could not join.');return}
+  myGroup={code:r.code,name:r.name,members:[]};groupLoaded=false;
+  toast('Joined '+r.name+' 🤝');
+  loadGroup(true);
+};
+$('grp-code-show').onclick=async()=>{
+  const code=myGroup&&myGroup.code;
+  if(!code)return;
+  try{await navigator.clipboard.writeText(code);toast('Code copied: '+code)}
+  catch(e){toast('Code: '+code)}
+};
+$('grp-leave').onclick=async()=>{
+  if(!confirm('Leave this fellowship?'))return;
+  const r=await api({act:'groupLeave',token}).catch(()=>null);
+  if(r&&r.ok){myGroup=null;groupLoaded=false;renderGroup();toast('Left the fellowship')}
+};
 $('rd-menu').onclick=()=>openBookSheet(cur.b);
 
 /* ============ books ============ */
@@ -670,12 +855,14 @@ $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('ope
 
 /* ============ nav ============ */
 function navTo(v){
-  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');
-  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-group',v==='group');
+  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');
   if(v==='books')renderBooks();
+  if(v==='group')loadGroup();
 }
 $('nv-home').onclick=()=>{stopTTS();navTo('home');refreshHome()};
 $('nv-books').onclick=()=>{stopTTS();navTo('books')};
+$('nv-group').onclick=()=>{stopTTS();navTo('group')};
 $('nv-reader').onclick=async()=>{
   const pos=JSON.parse(localStorage.getItem(LS_POS)||'null');
   if(pos&&pos.b<66)openReader(pos.b,pos.c,false);
