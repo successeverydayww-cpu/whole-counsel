@@ -198,7 +198,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
   <div class="lcard">
     <div class="ico">🏺</div>
     <h2>The original words, in your pocket</h2>
-    <p>Every word of Scripture is tappable. Touch any underlined word and the app opens its <b>original Hebrew or Greek</b> — the real word, its pronunciation, and its true meaning from the Strong's lexicon. Not a paraphrase. The origin.</p>
+    <p>Every word of Scripture is tappable. Touch any underlined word and the app opens its <b>original Hebrew or Greek</b> — the real word, its pronunciation, and its true meaning from the Strong's lexicon. Not a paraphrase. The origin. And when you want to go deeper, the <b>Ask button</b> brings a living teacher to any chapter or word.</p>
   </div>
 
   <div class="lcard">
@@ -314,6 +314,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
     <div class="rd-actions">
       <button class="btn" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)" id="rd-prev">← Previous</button>
+      <a class="btn" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14);text-decoration:none;text-align:center" id="rd-ask" href="#" target="_blank" rel="noopener">🎓 Ask</a>
       <button class="btn" id="rd-next">Mark read → Next</button>
     </div>
   </div>
@@ -373,7 +374,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v3.0';
+const APPVER='whole-counsel v3.1';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -678,6 +679,9 @@ function renderChapter(vs){
   window.scrollTo(0,0);
   const gi=gIdx(cur.b,cur.c);
   $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
+  $('rd-ask').href='https://wa.me/19312715621?text='+encodeURIComponent(
+    "Hello from The Whole Counsel. Please teach me about "+chapters[cur.b].n+' '+cur.c+
+    " — the context, the key Hebrew/Greek words, and how it applies to my life today.");
 }
 $('rd-back').onclick=()=>{stopTTS();navTo('home');refreshHome()};
 $('rd-prev').onclick=()=>{stopTTS();stepChapter(-1)};
@@ -752,6 +756,10 @@ async function openWordSheet(el){
       +(e.u?'<div class="wsUse">'+escH(e.u)+'</div>':'')
       +'</div>';
   }
+  const askTxt="Hello from The Whole Counsel. Teach me about the word '"+word+"' in "+ref+" (Strong's "+nums.join(', ')+
+    "). What does the original word really mean, and how is it used across Scripture?";
+  h+='<a class="btn" style="text-decoration:none;text-align:center;margin-top:10px" href="https://wa.me/19312715621?text='+
+    encodeURIComponent(askTxt)+'" target="_blank" rel="noopener">🎓 Ask for deeper teaching</a>';
   h+='<div class="sheetsub">Strong\'s Exhaustive Concordance numbering · public-domain lexicon</div>';
   $('sheet-inner').innerHTML=h;
 }
