@@ -156,7 +156,11 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .vctx{display:inline-block;background:rgba(242,201,76,.12);border:1px solid rgba(242,201,76,.35);color:var(--gold2);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;margin-bottom:10px}
 .vivaRef{color:var(--gold2);font-weight:700;border-bottom:1px dotted rgba(242,201,76,.6);cursor:pointer}
 .vsay{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--gold2);cursor:pointer;margin-top:6px;opacity:.85}
-.vivaRef, .vflash{background:rgba(242,201,76,.18);border-radius:6px;box-shadow:0 0 0 4px rgba(242,201,76,.18);transition:box-shadow 1s}
+.vivaRef, .wd.wdhit{background:linear-gradient(135deg,#1fae6a,#14894f);color:#fff!important;border-radius:7px;padding:1px 7px;border-bottom:none!important;font-weight:800;box-shadow:0 0 0 2px rgba(31,174,106,.35),0 4px 12px rgba(20,137,79,.45)}
+.wd.wdhit i{color:#fff}
+#jb-bar{position:fixed;left:12px;right:12px;bottom:78px;z-index:90;background:linear-gradient(135deg,#1fae6a,#14894f);color:#fff;border-radius:16px;padding:12px 16px;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.45);cursor:pointer}
+#jb-bar span{font-weight:600;font-size:12.5px;opacity:.92}
+.vflash{background:rgba(242,201,76,.18);border-radius:6px;box-shadow:0 0 0 4px rgba(242,201,76,.18);transition:box-shadow 1s}
 .wsTr{font-style:italic;color:#cfe8db;font-size:15px;margin-bottom:6px}
 .wsPos{font-size:12px;color:#9ec9b4;margin-bottom:6px}
 .wsDef{font-size:14px;line-height:1.55;color:#e8f5ee}
@@ -180,6 +184,12 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .gmsg .gacts .re.mine{background:rgba(242,201,76,.3);border:1px solid rgba(242,201,76,.5)}
 .gday{align-self:center;font-size:11px;color:#9ec9b4;background:rgba(255,255,255,.08);border-radius:999px;padding:4px 12px;margin:8px 0 2px}
 .gtime{font-size:10px;opacity:.6;margin-top:3px}
+#fl-chat:not(.hidden){display:flex;flex-direction:column;min-height:calc(var(--vh,1vh)*100 - 96px)}
+#fl-chat .gmsgs{flex:1 1 auto;overflow-y:auto;padding-bottom:84px}
+#fl-chat .ginbar{position:fixed;left:0;right:0;bottom:var(--kb,0px);margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(7,40,30,0),rgba(7,40,30,.97) 35%);z-index:80;max-width:640px;margin-left:auto;margin-right:auto}
+#fl-chat .greplybar{position:fixed;left:12px;right:12px;bottom:calc(var(--kb,0px) + 72px);z-index:81;margin:0}
+.libbar{bottom:calc(var(--kb,0px) + 64px)!important;transition:bottom .12s}
+body.kbopen .libbar{bottom:var(--kb,0px)!important}
 .ginbar{display:flex;gap:8px;margin-top:12px}
 .ginbar input,.libbar input{flex:1 1 auto;min-width:0;width:auto}
 .ginbar .btn,.libbar .btn{flex:0 0 auto;width:auto;min-width:54px;margin-top:0;padding:12px 18px}
@@ -273,6 +283,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .mrow .st2{font-size:13px;font-weight:800;color:var(--gold2);white-space:nowrap}
 .ginbar input{height:48px;border-radius:24px;padding:0 16px;font-size:16px;background:rgba(10,26,20,.96);border:1px solid rgba(242,201,76,.45)}
 .ginbar .btn{border-radius:24px}
+body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!important}
 </style>
 </head>
 <body>
@@ -832,7 +843,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.7';
+const APPVER='whole-counsel v6.8';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -947,6 +958,91 @@ async function boot(){
 $('ld-retry').onclick=()=>{booted=false;$('ld-retry').style.display='none';$('ldtxt').textContent='Preparing…';boot()};
 boot();
 
+/* ============ typing bar stays at the standard place: bottom; rises with the keyboard ============ */
+(function(){
+  const vv=window.visualViewport;
+  function setKb(){
+    const h=vv?vv.height:window.innerHeight;
+    document.documentElement.style.setProperty('--vh',(h/100)+'px');
+    const kb=vv?Math.max(0,window.innerHeight-vv.height-vv.offsetTop):0;
+    document.documentElement.style.setProperty('--kb',kb+'px');
+    document.body.classList.toggle('kbopen',kb>80);
+    if(kb>80){
+      const a=document.activeElement;
+      if(a&&(a.id==='gin'||a.id==='lib-in'||a.id==='viva-in')){
+        const box=document.getElementById(a.id==='gin'?'gmsgs':a.id==='lib-in'?'lib-chat':'viva-chat');
+        if(box){box.scrollTop=box.scrollHeight;box.lastElementChild&&box.lastElementChild.scrollIntoView({block:'end'})}
+      }
+    }
+  }
+  if(vv){vv.addEventListener('resize',setKb);vv.addEventListener('scroll',setKb)}
+  window.addEventListener('resize',setKb);
+  document.addEventListener('focusin',e=>{if(e.target&&e.target.tagName==='INPUT')setTimeout(setKb,250)});
+  document.addEventListener('focusout',()=>setTimeout(setKb,250));
+  setKb();
+})();
+
+/* ============ phone Back button: step back inside the app, then Home, never exit ============ */
+const BACKSTACK_KEY='wc_view';
+let __navBusy=false;
+function currentView(){
+  const ids=['reader','books','me','sub','ebooks','ebookread','admin','librarian','viva'];
+  for(const v of ids){const el=$('view-'+v);if(el&&!el.classList.contains('hidden'))return v}
+  if(!$('view-fellow').classList.contains('hidden'))return 'fellow';
+  return 'home';
+}
+function closeOverlaysFirst(){
+  /* anything floating on top is closed before navigating */
+  const sh=$('sheet');if(sh&&sh.classList.contains('open')){closeSheet();return true}
+  const md=$('menu-drop');if(md&&!md.classList.contains('hidden')){closeMenuDrop();return true}
+  const fd=$('fl-drop');if(fd&&!fd.classList.contains('hidden')){closeFlDrop();return true}
+  return false;
+}
+function backOnce(){
+  if(closeOverlaysFirst())return;
+  const v=currentView();
+  stopTTS&&stopTTS();
+  if(v==='home')return 'exit-guard';
+  if(v==='reader'){ if(jumpBack){returnFromJump();return} navTo('home');refreshHome();return }
+  if(v==='fellow'){ $('fl-back').click();return }
+  if(v==='viva'){ $('viva-back').click();return }
+  if(v==='librarian'){ $('lib-back').click();return }
+  if(v==='ebookread'){ const b=$('ebr-back')||$('eb-back'); if(b){b.click();return} navTo('ebooks');return }
+  if(v==='sub'){ navTo('me');return }
+  navTo('home');refreshHome();
+}
+function pushGuard(){try{history.pushState({wc:1},'',location.href)}catch(e){}}
+window.addEventListener('popstate',()=>{
+  /* every Back press lands here; re-arm the guard so the app can never be left by accident */
+  pushGuard();
+  if(!token||$('main').classList.contains('hidden')){return}
+  const r=backOnce();
+  if(r==='exit-guard'){ toast('Press Back again to leave'); window.__backArm=Date.now(); }
+});
+window.addEventListener('popstate',()=>{
+  /* second Back within 2s on Home really leaves */
+  if(window.__backArm&&Date.now()-window.__backArm<2000&&currentView()==='home'&&window.__backArm2){history.go(-2)}
+  if(window.__backArm)window.__backArm2=true;
+});
+pushGuard();pushGuard();
+
+/* remember the page across refresh */
+function saveView(){try{if(token)localStorage.setItem(BACKSTACK_KEY,currentView())}catch(e){}}
+setInterval(saveView,1500);
+document.addEventListener('visibilitychange',saveView);
+window.addEventListener('pagehide',saveView);
+async function restoreView(){
+  const v=localStorage.getItem(BACKSTACK_KEY);
+  if(!v||v==='home')return;
+  try{
+    if(v==='reader'){const pos=JSON.parse(localStorage.getItem(LS_POS)||'null');if(pos&&pos.b<66)openReader(pos.b,pos.c,false)}
+    else if(v==='fellow')openFellow();
+    else if(v==='books')navTo('books');
+    else if(v==='me')navTo('me');
+    else if(v==='sub')navTo('sub');
+  }catch(e){}
+}
+
 /* ============ landing / auth ============ */
 $('btn-start').onclick=()=>{show('landing',false);show('auth',true)};
 $('back-landing').onclick=()=>{show('auth',false);show('landing',true)};
@@ -1021,6 +1117,7 @@ async function enter(){
   const local=localStorage.getItem(LS_PR)||'';
   prLoad(local);
   show('main',true); show('view-home',true); refreshHome();
+  setTimeout(restoreView,60);
   warmCache();
   loadMe();
   api({act:'load',token}).then(res=>{
@@ -1111,6 +1208,8 @@ let readerToken=0;
 async function openReader(b,c,fromToday){
   const my=++readerToken;
   cur={b,c};
+  if(jumpBack && jumpBack.b===b && jumpBack.c===c && !pendingVerse){jumpBack=null}
+  setTimeout(showJumpBar,0);
   localStorage.setItem(LS_POS,JSON.stringify(cur));
   stopTTS();
   navTo('reader');
@@ -1156,19 +1255,50 @@ function renderChapter(vs){
     p.innerHTML=verseHTML(t,i+1);
     box.appendChild(p);
   });
+  box.querySelectorAll('.wd').forEach(el=>{el.onclick=()=>openWordSheet(el)});
+  let jumped=false;
   if(pendingVerse){
     const vp=box.children[pendingVerse-1];
-    if(vp){vp.classList.add('vflash');setTimeout(()=>{vp.scrollIntoView({block:'center'});vp.classList.remove('vflash')},260)}
-    pendingVerse=0;
+    if(vp){
+      jumped=true;
+      vp.classList.add('vflash');
+      if(pendingStrong){
+        vp.querySelectorAll('.wd').forEach(w=>{
+          if((w.dataset.s||'').split('|').includes(pendingStrong))w.classList.add('wdhit');
+        });
+      }
+      const target=vp.querySelector('.wdhit')||vp;
+      setTimeout(()=>{target.scrollIntoView({block:'center'})},120);
+      setTimeout(()=>{target.scrollIntoView({block:'center'})},420);
+      setTimeout(()=>vp.classList.remove('vflash'),2600);
+    }
+    pendingVerse=0;pendingStrong='';
   }
-  box.querySelectorAll('.wd').forEach(el=>{el.onclick=()=>openWordSheet(el)});
-  window.scrollTo(0,0);
+  if(!jumped)window.scrollTo(0,0);
+  if(jumpBack&&!jumped){}
   const gi=gIdx(cur.b,cur.c);
   $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
   const rdRef=chapters[cur.b].n+' '+cur.c;
   $('rd-ask').onclick=()=>openViva('Chapter in view: '+rdRef);
 }
-$('rd-back').onclick=()=>{stopTTS();navTo('home');refreshHome()};
+function showJumpBar(){
+  let bar=$('jb-bar');
+  if(!jumpBack){if(bar)bar.remove();return}
+  if(!bar){bar=document.createElement('div');bar.id='jb-bar';document.body.appendChild(bar)}
+  bar.innerHTML='<div>← Back to '+escH(chapters[jumpBack.b].n+' '+jumpBack.c)+'<br><span>where you were reading</span></div><div style="font-size:20px">↩</div>';
+  bar.onclick=()=>returnFromJump();
+}
+function returnFromJump(){
+  const jb=jumpBack;jumpBack=null;
+  const bar=$('jb-bar');if(bar)bar.remove();
+  stopTTS();
+  if(jb)openReader(jb.b,jb.c,false);
+  else{navTo('home');refreshHome()}
+}
+$('rd-back').onclick=()=>{
+  if(jumpBack){returnFromJump();return}
+  stopTTS();navTo('home');refreshHome();
+};
 $('rd-prev').onclick=()=>{stopTTS();stepChapter(-1)};
 $('rd-next').onclick=()=>{stopTTS();stepChapter(+1,true)};
 async function stepChapter(dir,mark){
@@ -1279,14 +1409,19 @@ async function loadOcc(s){
 }
 function bindRefs(scope){
   scope.querySelectorAll('.wsRef2').forEach(el=>{
-    el.onclick=()=>{closeSheet();jumpVerse(+el.dataset.b,+el.dataset.c,+el.dataset.v)};
+    el.onclick=()=>{
+      const sn=(scope.id||'').replace('ws-occ-','')||(el.closest('[id^="ws-occ-"]')||{id:''}).id.replace('ws-occ-','');
+      closeSheet();jumpVerse(+el.dataset.b,+el.dataset.c,+el.dataset.v,sn);
+    };
   });
 }
 function isH(s){return s[0]==='H'}
-async function jumpVerse(b,c,v){
-  cur={b,c};
+let jumpBack=null, pendingStrong='';
+async function jumpVerse(b,c,v,strong){
+  /* remember the chapter the reader was in so Back returns there, not Home */
+  if(!jumpBack && cur && typeof cur.b==='number' && !$('view-reader').classList.contains('hidden')) jumpBack={b:cur.b,c:cur.c};
+  pendingVerse=v; pendingStrong=strong||'';
   await openReader(b,c,true);
-  pendingVerse=v;
 }
 async function openWordSheet(el){
   if(!isMember()){
@@ -2363,6 +2498,7 @@ $('nv-mybooks').onclick=async()=>{
   setTimeout(()=>{const m=$('eb-mine');if(m){if(m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'start'});renderMyBooks();}},120);
 };
 function navTo(v){
+  if(v!=='reader'){const jb=$('jb-bar');if(jb)jb.remove();if(v==='home'||v==='books'||v==='me')jumpBack=null}
   if((v==='ebooks'||v==='ebookread'||v==='librarian'||v==='viva')&&typeof isMember==='function'&&!isMember()){ebLockSheet();return}
   show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');show('view-librarian',v==='librarian');show('view-viva',v==='viva');
   if(v==='admin')loadAdmin();
