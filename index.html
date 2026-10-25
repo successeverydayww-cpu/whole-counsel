@@ -194,6 +194,14 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .hubc .l{font-size:12px;color:#cfe8db;margin-top:2px}
 .tick{color:#4fae83;font-size:11px;margin-right:3px}
 .tick.on{color:var(--gold2)}
+.lex{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.lex:last-of-type{border-bottom:none}
+.lw{font-size:26px;min-width:92px;color:var(--gold2);font-weight:700;font-family:'SBL Hebrew','Ezra SIL','Times New Roman',serif;text-align:center}
+.lm{font-size:13.5px;color:#d8efe2;line-height:1.4}
+.ben{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13.5px;line-height:1.5;color:#d8efe2}
+.ben:last-child{border-bottom:none}
+.ben b{color:var(--gold2);font-size:14px;letter-spacing:.3px}
+.bi2{font-size:24px;line-height:1.2}
 #lib-chat{display:flex;flex-direction:column;gap:10px;padding:14px 4px 120px}
 .lb{max-width:86%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
 .lb.me{align-self:flex-end;background:rgba(242,201,76,.16);border:1px solid rgba(242,201,76,.3)}
@@ -289,6 +297,30 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="ico">🏺</div>
     <h2>The original words, in your pocket</h2>
     <p>Every word of Scripture is tappable. Touch any underlined word and the app opens its <b>original Hebrew or Greek</b> — the real word, its pronunciation, and its true meaning from the Strong's lexicon. Not a paraphrase. The origin. And when you want to go deeper, the <b>Ask button</b> brings a living teacher to any chapter or word.</p>
+  </div>
+
+  <div class="lcard">
+    <div class="ico">🔤</div>
+    <h2>See the Hebrew &amp; Greek behind the words</h2>
+    <p>A taste of what every verse opens up for members:</p>
+    <div class="lex"><div class="lw">אַהֲבָה</div><div class="lm"><b>ahavah</b> · Hebrew · <i>love, affection</i></div></div>
+    <div class="lex"><div class="lw">ἀγάπη</div><div class="lm"><b>agapē</b> · Greek · <i>divine, selfless love</i></div></div>
+    <div class="lex"><div class="lw">שָׁלוֹם</div><div class="lm"><b>shalom</b> · Hebrew · <i>peace, wholeness, wellbeing</i></div></div>
+    <div class="lex"><div class="lw">χάρις</div><div class="lm"><b>charis</b> · Greek · <i>grace, favour, kindness</i></div></div>
+    <div class="lex"><div class="lw">πίστις</div><div class="lm"><b>pistis</b> · Greek · <i>faith, trust, conviction</i></div></div>
+    <p style="margin-top:10px">Over <b>14,000 entries</b> from the Strong's lexicon. Tap any underlined word and its original meaning opens instantly.</p>
+  </div>
+
+  <div class="lcard">
+    <div class="ico">📚</div>
+    <h2>A Christian library and your own AI Librarian</h2>
+    <p>Members get a <b>free library of classic Christian books</b> and an <b>AI Librarian</b>: tell it any title, author or topic, and it searches the free libraries, finds the book in seconds and drops it into your <b>My Books</b> shelf to read anywhere, even offline.</p>
+  </div>
+
+  <div class="lcard">
+    <div class="ico">🌱</div>
+    <h2>Coming soon</h2>
+    <p><b>Daily reminders</b>, a <b>journal and prayer notes</b>, <b>memory verses</b>, a <b>chronological reading plan</b>, and deeper word studies across every book. The Whole Counsel keeps growing.</p>
   </div>
 
   <div class="lcard">
@@ -389,7 +421,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
     <div class="card" style="display:flex;align-items:center;gap:10px;cursor:pointer" id="btn-ebooks">
       <span style="font-size:26px">📚</span>
-      <span style="flex:1"><b>Get e-books</b><br><span style="font-size:12px;color:#9ec9b4">Free classic Christian library — search, download, read inside</span></span>
+      <span style="flex:1"><b>Get e-books</b> <span style="font-size:10px;font-weight:800;color:#1a1a1a;background:var(--gold2);border-radius:6px;padding:2px 6px;margin-left:4px">MEMBERS</span><br><span style="font-size:12px;color:#9ec9b4">Classic Christian library + AI Librarian — search, download, read inside</span></span>
       <span style="color:var(--gold2)">→</span>
     </div>
     <div class="card daycard hidden" id="home-sub-card" style="cursor:pointer">
@@ -720,7 +752,16 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="rd-top"><button class="iconbtn" id="sub-back">←</button><div class="t">Membership</div></div>
     <div class="card daycard">
       <div class="day">Become a member</div>
-      <div class="lockcard" style="margin-top:8px">Reading the Word is free forever. Membership unlocks the <b>Word Study</b> (every word in its original Hebrew and Greek) and the <b>Fellowship</b> (groups, chat, announcements and prayer rooms).</div>
+      <div class="lockcard" style="margin-top:8px"><b>Reading the Word is free forever.</b> Membership unlocks the deeper tools below.</div>
+    </div>
+    <div class="card" id="sub-benefits">
+      <label style="margin-top:0">✨ MEMBER BENEFITS</label>
+      <div class="ben"><span class="bi2">🏺</span><div><b>HEBREW &amp; GREEK WORD STUDY</b><br>Tap any word of Scripture to see the original word, its pronunciation and true meaning (Strong's lexicon).</div></div>
+      <div class="ben"><span class="bi2">📚</span><div><b>FREE E-BOOK LIBRARY</b><br>Search and download classic Christian books and read them inside the app, even offline.</div></div>
+      <div class="ben"><span class="bi2">🤖</span><div><b>THE AI LIBRARIAN</b><br>Ask for any book by title, author or topic. The Librarian searches the free Christian libraries, finds it in seconds and delivers it into My Books.</div></div>
+      <div class="ben"><span class="bi2">📕</span><div><b>MY BOOKS</b><br>Your personal shelf. Every book you get is saved on your phone for offline reading.</div></div>
+      <div class="ben"><span class="bi2">🤝</span><div><b>FELLOWSHIP GROUPS</b><br>Create or join a group: chat, videos, announcements, prayer rooms and member progress.</div></div>
+      <div class="ben"><span class="bi2">🙏</span><div><b>PRAYER ROOMS &amp; SCHEDULES</b><br>Gather with your fellowship at the set prayer time and never miss it.</div></div>
     </div>
     <div class="card" id="sub-plans">
       <label style="margin-top:0">Choose your plan</label>
@@ -763,7 +804,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.2';
+const APPVER='whole-counsel v6.3';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1889,7 +1930,7 @@ async function renderMyBooks(){
     box.appendChild(row);
   });
 }
-$('btn-ebooks').onclick=()=>navTo('ebooks');
+$('btn-ebooks').onclick=()=>{if(!isMember()){ebLockSheet();return}navTo('ebooks')};
 $('eb-back').onclick=()=>{stopBkTTS();navTo('home')};
 $('bk-back').onclick=()=>{stopBkTTS();navTo('ebooks')};
 $('eb-librarian').onclick=()=>{
@@ -1904,7 +1945,7 @@ async function doSearch(){
   if(!q){toast('Type something to search.');return}
   if(ebBusy)return;
   ebBusy=true;$('eb-go').textContent='Searching…';
-  const r=await api({act:'ebookSearch',q}).catch(()=>null);
+  const r=await api({act:'ebookSearch',token,q}).catch(()=>null);
   ebBusy=false;$('eb-go').textContent='🔎 Search';
   if(!r||!r.ok){
     if(r&&r.error&&r.error.includes('No books found')){
@@ -1933,7 +1974,7 @@ async function getEbook(b){
   const mine=booksAll();
   if(mine[b.id]){openEbook(b.id);return}
   toast('Fetching “'+(b.title||'book').slice(0,40)+'”…');
-  const r=await api({act:'ebookFetch',id:b.id,ia:!!b.ia,title:b.title||'',author:b.author||''}).catch(()=>null);
+  const r=await api({act:'ebookFetch',token,id:b.id,ia:!!b.ia,title:b.title||'',author:b.author||''}).catch(()=>null);
   if(!r||!r.ok){toast(r&&r.error||'Could not get that book.');return}
   let text=r.text;
   if(r.direct){
@@ -2070,9 +2111,15 @@ $('btn-pace').onclick=()=>{
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('open')};
 
 /* ============ nav ============ */
+function ebLockSheet(){
+  $('sheet-inner').innerHTML='<h3>📚 E-books are for members</h3><div class="lockcard" style="margin:10px 0 14px">🔒 The free classic Christian library, the <b>AI Librarian</b> and <b>My Books</b> are <b>members only</b>. Reading the Bible stays free forever. Become a member to unlock e-books, Word Study and Fellowship.</div><div class="gtrow"><button class="btn" id="eb-lock-sub">✨ See membership benefits</button></div>';
+  $('sheet').classList.add('open');
+  $('eb-lock-sub').onclick=()=>{closeSheet();navTo('sub')};
+}
 /* ===== librarian chat ===== */
 let libHist=[];
 function openLibrarian(prefill){
+  if(!isMember()){ebLockSheet();return}
   navTo('librarian');
   if(prefill){$('lib-in').value=prefill}
   setTimeout(()=>$('lib-in').focus(),200);
@@ -2112,6 +2159,7 @@ async function libSend(){
   const chat=$('lib-chat');
   const thinking=[...chat.querySelectorAll('.lb.ai')].pop();
   if(thinking&&thinking.textContent.includes('Searching the shelves'))thinking.remove();
+  if(r&&r.members_only){navTo('home');ebLockSheet();return}
   if(!r||!r.ok){libBubble('ai',(r&&r.error)||'The library is unreachable right now — try again in a moment.');return}
   libBubble('ai',r.reply);
   libHist.push({role:'assistant',content:r.reply});
@@ -2122,10 +2170,12 @@ $('lib-in').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault(
 $('lib-back').onclick=()=>navTo('ebooks');
 $('nv-mybooks').onclick=async()=>{
   stopTTS();
+  if(!isMember()){ebLockSheet();return}
   navTo('ebooks');
   setTimeout(()=>{const m=$('eb-mine');if(m){if(m.scrollIntoView)m.scrollIntoView({behavior:'smooth',block:'start'});renderMyBooks();}},120);
 };
 function navTo(v){
+  if((v==='ebooks'||v==='ebookread'||v==='librarian')&&typeof isMember==='function'&&!isMember()){ebLockSheet();return}
   show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-me',v==='me');show('view-sub',v==='sub');show('view-ebooks',v==='ebooks');show('view-ebookread',v==='ebookread');show('view-admin',v==='admin');show('view-librarian',v==='librarian');
   if(v==='admin')loadAdmin();
   if(v==='librarian')setTimeout(()=>{const li=$('lib-in');if(li)li.focus()},150);
