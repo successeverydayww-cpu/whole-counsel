@@ -1,4 +1,4 @@
-const VER = 'whole-counsel-v4.1';
+const VER = 'whole-counsel-v4.2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './bible.json'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VER).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

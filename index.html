@@ -566,7 +566,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     <div class="card">
       <div class="ref" id="bk-title">—</div>
       <div class="ref" id="bk-author" style="font-size:12.5px;color:#9ec9b4">—</div>
-      <div style="display:flex;gap:8px;margin:8px 0 12px"><button class="btn" id="bk-del" style="background:rgba(255,255,255,.08);color:#e8a3a3;box-shadow:none;border:1px solid rgba(255,255,255,.14);padding:7px 12px;font-size:12px">🗑 Remove book</button></div>
+      <div style="display:flex;gap:8px;margin:8px 0 12px"><button class="btn" id="bk-dl" style="padding:7px 12px;font-size:12px">⬇ Save to phone</button><button class="btn" id="bk-del" style="background:rgba(255,255,255,.08);color:#e8a3a3;box-shadow:none;border:1px solid rgba(255,255,255,.14);padding:7px 12px;font-size:12px">🗑 Remove from app</button></div>
       <div class="bkpage" id="bk-page">…</div>
       <div class="pgn">
         <button class="btn" id="bk-prev" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)">← Previous</button>
@@ -658,7 +658,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v4.1';
+const APPVER='whole-counsel v4.2';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1591,6 +1591,19 @@ function renderBkPage(){
 }
 $('bk-prev').onclick=()=>{if(!bk.cur)return;if(bk.cur.page>0){bk.cur.page--;renderBkPage()}};
 $('bk-next').onclick=()=>{if(!bk.cur)return;if(bk.cur.page<bk.cur.pages-1){bk.cur.page++;renderBkPage()}};
+$('bk-dl').onclick=()=>{
+  const b=bk.cur;if(!b)return;
+  try{
+    const safe=(b.title||'book').replace(/[^a-z0-9\- ]/gi,'').trim().slice(0,60)||'book';
+    const blob=new Blob([b.text],{type:'text/plain;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=safe+' - '+b.author.replace(/[^a-z0-9\- ]/gi,'').trim().slice(0,30)+'.txt';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    toast('Saved to your phone 📲 (check your Downloads)');
+  }catch(e){toast('Download not supported on this browser.')}
+};
 $('bk-del').onclick=()=>{
   if(!bk.cur)return;
   if(!confirm('Remove “'+bk.cur.title.slice(0,40)+'” from My Books?'))return;
