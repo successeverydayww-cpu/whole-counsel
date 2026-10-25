@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07281e">
+<title>The Whole Counsel</title>
+<meta name="description" content="Read the whole Bible from Genesis to Revelation — a daily track with read-aloud. By Samuel Amos.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --em:#07281e; --em2:#0c3b2e; --em3:#14503f; --gold:#d9a92b; --gold2:#f2c94c;
+  --cream:#f7f2e4; --ink:#123c2f; --glass:rgba(255,255,255,.08); --glass2:rgba(255,255,255,.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,'Segoe UI',Roboto,system-ui,sans-serif;background:radial-gradient(1200px 800px at 50% -10%,#0f4737 0%,var(--em) 55%);color:#fff;min-height:100dvh;overflow-x:hidden}
+#app{max-width:640px;margin:0 auto;padding:18px 16px 90px;transition:opacity .25s}
+.fade{animation:fIn .35s ease}
+@keyframes fIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.brand{text-align:center;padding:18px 0 6px}
+.brand .logo{width:74px;height:74px;margin:0 auto 10px;border-radius:20px;background:linear-gradient(145deg,var(--em3),var(--em2));display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.15)}
+.brand h1{font-size:26px;font-weight:800;letter-spacing:.4px;background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand .verse{font-size:12.5px;color:#bfe8d4;opacity:.85;font-style:italic;margin-top:4px}
+.card{background:var(--glass);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 8px 28px rgba(0,0,0,.35);margin-top:14px}
+.tabs{display:flex;gap:8px;margin-top:14px}
+.tabs button{flex:1;padding:11px;border:none;border-radius:14px;background:rgba(255,255,255,.07);color:#cfe8db;font-weight:700;font-size:15px;cursor:pointer;transition:.2s}
+.tabs button.on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2b1d02;box-shadow:0 6px 18px rgba(217,169,43,.35)}
+label{display:block;font-size:12.5px;font-weight:700;color:#bfe8d4;margin:14px 0 6px;letter-spacing:.3px;text-transform:uppercase}
+input{width:100%;padding:13px 14px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;font-size:15.5px;outline:none;transition:.2s}
+input:focus{border-color:var(--gold);background:rgba(255,255,255,.12)}
+.pwrow{position:relative}
+.pwrow input{padding-right:48px}
+.eyebtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:20px;cursor:pointer;padding:8px;opacity:.8}
+.btn{display:block;width:100%;padding:14px;margin-top:18px;border:none;border-radius:14px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2b1d02;font-size:16px;font-weight:800;letter-spacing:.3px;cursor:pointer;transition:.2s;box-shadow:0 8px 22px rgba(217,169,43,.35)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)}
+.err{display:none;margin-top:12px;padding:11px 13px;border-radius:12px;background:rgba(214,69,69,.16);border:1px solid rgba(214,69,69,.45);color:#ffd9d9;font-size:13.5px}
+.okmsg{display:none;margin-top:12px;padding:11px 13px;border-radius:12px;background:rgba(46,160,105,.18);border:1px solid rgba(46,160,105,.5);color:#c9f2dd;font-size:13.5px}
+.hint{font-size:12px;color:#9ec9b4;margin-top:10px;text-align:center}
+.hidden{display:none!important}
+#loader{position:fixed;inset:0;background:var(--em);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;transition:opacity .5s}
+#loader .logo{width:84px;height:84px;border-radius:22px;background:linear-gradient(145deg,var(--em3),var(--em2));display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+#loader .bar{width:210px;height:7px;border-radius:4px;background:rgba(255,255,255,.12);margin-top:22px;overflow:hidden}
+#loader .bar div{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width .3s}
+#loader p{margin-top:12px;font-size:13px;color:#bfe8d4}
+.tophead{display:flex;align-items:center;gap:12px;padding:4px 2px 10px}
+.tophead .mini{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,var(--em3),var(--em2));display:flex;align-items:center;justify-content:center;font-size:23px;flex:none;box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.tophead .tt{flex:1;min-width:0}
+.tophead .tt .h{font-size:19px;font-weight:800}
+.tophead .tt .s{font-size:12px;color:#bfe8d4}
+.iconbtn{background:var(--glass2);border:none;border-radius:12px;width:42px;height:42px;color:#fff;font-size:19px;cursor:pointer;flex:none}
+.greet{font-size:22px;font-weight:800;margin:10px 2px 0}
+.sub{font-size:13px;color:#bfe8d4;margin:3px 2px 0}
+.streak{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 13px;border-radius:999px;background:linear-gradient(135deg,rgba(217,169,43,.22),rgba(242,201,76,.12));border:1px solid rgba(242,201,76,.4);font-size:13.5px;font-weight:700;color:var(--gold2)}
+.daycard{background:linear-gradient(160deg,rgba(217,169,43,.14),var(--glass));border:1px solid rgba(242,201,76,.32)}
+.daycard .day{font-size:12px;letter-spacing:2px;font-weight:800;color:var(--gold2);text-transform:uppercase}
+.daycard .ref{font-size:24px;font-weight:800;margin:7px 0 3px;line-height:1.25}
+.daycard .ref small{font-size:14px;color:#cfe8db;font-weight:600}
+.prog{margin-top:14px}
+.prog .lbl{display:flex;justify-content:space-between;font-size:12.5px;color:#cfe8db;margin-bottom:6px}
+.prog .track{height:9px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden}
+.prog .track div{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--gold2),var(--gold));transition:width .6s ease}
+.chlist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.chrow{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:.15s}
+.chrow:active{transform:scale(.98)}
+.chrow .dot{width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25)}
+.chrow.read .dot{background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:transparent;color:#2b1d02}
+.chrow .nm{flex:1;font-size:15.5px;font-weight:700}
+.chrow .nm small{display:block;font-size:11.5px;color:#9ec9b4;font-weight:500;margin-top:2px}
+.chrow .go{font-size:19px;color:var(--gold2)}
+nav.bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(7,40,30,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:30}
+nav.bottom button{background:none;border:none;color:#9ec9b4;font-size:11px;font-weight:700;cursor:pointer;padding:6px 14px;border-radius:12px;transition:.2s}
+nav.bottom button .ic{display:block;font-size:20px;margin-bottom:2px}
+nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
+.reader{padding-top:6px}
+.rd-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.rd-top .t{flex:1;font-size:17px;font-weight:800}
+.verses{margin-top:10px;line-height:1.72;font-size:17.5px;color:#f3f7f2}
+.verses p{margin-bottom:13px;padding:8px 10px;border-radius:10px;transition:background .3s}
+.verses p.speaking{background:rgba(217,169,43,.16);box-shadow:0 0 0 1px rgba(242,201,76,.4)}
+.verses .vn{color:var(--gold2);font-weight:800;font-size:.78em;margin-right:7px;vertical-align:top}
+.rd-actions{display:flex;gap:9px;margin:16px 0 8px}
+.rd-actions .btn{margin-top:0;padding:12px;font-size:14px}
+.ttsbar{display:flex;gap:8px;align-items:center;margin-top:14px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)}
+.ttsbar button{background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:10px;padding:8px 13px;font-size:15px;cursor:pointer}
+.ttsbar select{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:8px;font-size:13px}
+.ttsbar .st{font-size:12px;color:#bfe8d4;margin-left:auto}
+.books{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}
+.bk{padding:12px;border-radius:13px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);cursor:pointer}
+.bk .n{font-weight:800;font-size:14.5px}
+.bk .c{font-size:11.5px;color:#9ec9b4;margin-top:2px}
+.bk.done{border-color:rgba(242,201,76,.45)}
+.sheet{position:fixed;inset:0;background:rgba(4,20,15,.6);z-index:40;display:none;align-items:flex-end}
+.sheet.open{display:flex}
+.sheet .inner{background:#0d3629;width:100%;max-width:640px;margin:0 auto;border-radius:24px 24px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));max-height:78dvh;overflow:auto;animation:sUp .28s ease}
+@keyframes sUp{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sheet h3{font-size:17px;margin-bottom:12px}
+.sheet .sheetsub{text-align:center;font-size:12.5px;color:#9ec9b4;margin-top:8px}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.chgrid button{padding:11px 0;border-radius:11px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.chgrid button.rd{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#2b1d02;border-color:transparent}
+.statrow{display:flex;gap:10px;margin-top:12px}
+.stat{flex:1;text-align:center;padding:14px 8px;border-radius:15px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.stat .v{font-size:21px;font-weight:800;color:var(--gold2)}
+.stat .k{font-size:11px;color:#9ec9b4;margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:#123c2f;border:1px solid rgba(242,201,76,.5);color:#f2e9c9;padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;opacity:0;transition:.3s;pointer-events:none;z-index:60;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="loader">
+  <div class="logo">📖</div>
+  <div class="bar"><div id="ldbar"></div></div>
+  <p id="ldtxt">Loading the Scriptures…</p>
+</div>
+
+<div id="app" class="hidden">
+
+  <!-- AUTH -->
+  <div id="auth" class="hidden">
+    <div class="brand">
+      <div class="logo">📖</div>
+      <h1>The Whole Counsel</h1>
+      <div class="verse">"I have not shunned to declare unto you all the counsel of God." — Acts 20:27</div>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <button id="tab-in" class="on">Sign in</button>
+        <button id="tab-up">Create account</button>
+      </div>
+      <label>Email</label>
+      <input id="f-email" type="email" inputmode="email" autocapitalize="off" placeholder="your@email.com">
+      <label id="lb-pw">Password</label>
+      <div class="pwrow">
+        <input id="f-pw" type="password" placeholder="Your password">
+        <button class="eyebtn" id="eye" aria-label="Show password">👁</button>
+      </div>
+      <div id="grp-confirm" class="hidden">
+        <label>Confirm password</label>
+        <div class="pwrow">
+          <input id="f-pw2" type="password" placeholder="Type the password again">
+          <button class="eyebtn" id="eye2" aria-label="Show password">👁</button>
+        </div>
+      </div>
+      <div id="err" class="err"></div>
+      <button class="btn" id="go-btn">Sign in</button>
+      <div class="hint">Your reading progress is saved to your account and follows you across devices.</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main" class="hidden">
+    <div class="tophead">
+      <div class="mini">📖</div>
+      <div class="tt"><div class="h">The Whole Counsel</div><div class="s" id="hdr-email"></div></div>
+      <button class="iconbtn" id="btn-out" title="Sign out">⏻</button>
+    </div>
+
+    <!-- HOME -->
+    <div id="view-home" class="fade">
+      <div class="greet" id="greet"></div>
+      <div class="sub" id="greet-sub">Grace and peace as you open the Word.</div>
+      <div class="streak" id="streak-pill">🔥 <span id="streak-n">0</span>-day streak</div>
+
+      <div class="card daycard">
+        <div class="day">Today's portion · Day <span id="day-n">1</span> of 365</div>
+        <div class="ref" id="day-ref">—</div>
+        <div class="ref" style="font-size:13px;color:#cfe8db;font-weight:600" id="day-versecount"></div>
+        <button class="btn" id="btn-continue">📖 Continue reading</button>
+      </div>
+
+      <div class="card">
+        <div class="prog">
+          <div class="lbl"><span>Whole Bible progress</span><span id="prog-pct">0%</span></div>
+          <div class="track"><div id="prog-fill" style="width:0%"></div></div>
+        </div>
+        <div class="statrow">
+          <div class="stat"><div class="v" id="st-ch">0</div><div class="k">Chapters read</div></div>
+          <div class="stat"><div class="v" id="st-books">0</div><div class="k">Books done</div></div>
+          <div class="stat"><div class="v" id="st-verses">0</div><div class="k">Verses read</div></div>
+        </div>
+      </div>
+
+      <div class="card" id="today-card">
+        <label style="margin-top:0">Today's chapters</label>
+        <div class="chlist" id="today-list"></div>
+      </div>
+    </div>
+
+    <!-- READER -->
+    <div id="view-reader" class="hidden">
+      <div class="reader">
+        <div class="rd-top">
+          <button class="iconbtn" id="rd-back">←</button>
+          <div class="t" id="rd-title">—</div>
+          <button class="iconbtn" id="rd-menu" title="Chapters">☰</button>
+        </div>
+        <div class="verses" id="rd-verses"></div>
+        <div class="ttsbar">
+          <button id="tts-play">▶ Listen</button>
+          <button id="tts-stop">■ Stop</button>
+          <select id="tts-speed">
+            <option value="0.85">0.85×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.15">1.15×</option>
+            <option value="1.3">1.3×</option>
+          </select>
+          <div class="st" id="tts-st">Read-aloud</div>
+        </div>
+        <div class="rd-actions">
+          <button class="btn ghost" id="rd-prev">← Previous</button>
+          <button class="btn" id="rd-next">Mark read → Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div id="view-books" class="hidden fade">
+      <div class="greet">The Scriptures</div>
+      <div class="sub">All 66 books · tap any book to read</div>
+      <div class="books" id="books-grid"></div>
+    </div>
+
+    <nav class="bottom">
+      <button id="nv-home" class="on"><span class="ic">🏠</span>Today</button>
+      <button id="nv-books"><span class="ic">📚</span>Books</button>
+      <button id="nv-reader"><span class="ic">📖</span>Reader</button>
+    </nav>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="inner" id="sheet-inner"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ config ============ */
+const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
+const APPVER='whole-counsel v1.0';
+const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed';
+const NCH=1189, NTOTV=31102, DAYS=365;
+
+/* ============ tiny helpers ============ */
+const $=id=>document.getElementById(id);
+const show=(el,on)=>$(el).classList.toggle('hidden',!on);
+let toastT;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
+async function api(body){
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  try{return await r.json()}catch(e){return {ok:false,error:'Cannot reach the server. Check your connection.'}}
+}
+
+/* ============ bitset progress ============ */
+let prog=new Uint8Array(Math.ceil(NCH/8));
+function prLoad(s){prog=new Uint8Array(Math.ceil(NCH/8));if(!s)return;try{const b=atob(s);for(let i=0;i<b.length&&i<prog.length;i++)prog[i]=b.charCodeAt(i)}catch(e){}}
+function prB64(){let s='';for(const b of prog)s+=String.fromCharCode(b);return btoa(s)}
+function prSet(i){prog[i>>3]|=1<<(i&7)}
+function prGet(i){return (prog[i>>3]>>(i&7)&1)===1}
+function prCount(){let n=0;for(let i=0;i<NCH;i++)if(prGet(i))n++;return n}
+
+/* ============ state ============ */
+let bible=null, cum=null, bookStart=null, bookOfCh=null, numChOfBook=null, dayMap=null, gDay=null;
+let token=localStorage.getItem(LS_T)||'';
+let email='';
+let started=0;
+let streak=parseInt(localStorage.getItem(LS_STK)||'0');
+let lastDay=0;
+let cur={b:0,c:0};          // current reader chapter: book idx, chapter idx (1-based)
+let curDay=0;               // day index shown in Today
+let readingToday=false;     // reader opened from Today view
+let tts={playing:false,idx:0};
+
+/* ============ index math ============ */
+function buildIndex(){
+  cum=[0]; bookOfCh=[]; bookStart=[]; numChOfBook=[]; dayMap=[]; gDay=new Array(NCH);
+  for(let d=0;d<DAYS;d++)dayMap[d]=[];
+  let g=0;
+  bible.forEach((bk,bi)=>{
+    bookStart[bi]=g; numChOfBook[bi]=bk.ch.length;
+    bk.ch.forEach(vs=>{cum[g+1]=cum[g]+vs.length; bookOfCh[g]=bi; g++});
+  });
+  // natural assignment: chapter's start position decides the day
+  for(let i=0;i<NCH;i++){
+    const d=Math.min(DAYS-1,Math.floor(cum[i]/NTOTV*DAYS));
+    dayMap[d].push(i); gDay[i]=d;
+  }
+  // a very long chapter can leave a day with no chapter start — borrow the first chapter of the next day so every day has a portion
+  for(let d=0;d<DAYS-1;d++){
+    while(dayMap[d].length===0){
+      let e=d+1; while(e<DAYS&&dayMap[e].length===0)e++;
+      if(e>=DAYS)break;
+      const moved=dayMap[e].shift();
+      dayMap[d].push(moved); gDay[moved]=d;
+    }
+  }
+}
+const chVerses=(gi)=>cum[gi+1]-cum[gi];
+const gIdx=(b,c)=>bookStart[b]+c-1;      // c is 1-based
+const bOfG=(gi)=>bookOfCh[gi];
+const cOfG=(gi)=>gi-(bookStart[bOfG(gi)]||0)+1;
+const refOf=(gi)=>bible[bOfG(gi)].n+' '+cOfG(gi);
+function dayOfG(gi){return gDay[gi]||0}
+function chaptersOfDay(d){return dayMap[Math.max(0,Math.min(DAYS-1,d))]||[]}
+
+/* ============ date/streak ============ */
+const dayMs=864e5;
+function epochDay(ts){const d=new Date(ts);return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/dayMs)}
+function todayEpoch(){return epochDay(Date.now())}
+function dayIdxNow(){ // 0-based plan day from account start
+  const s=epochDay(started||Date.now());
+  const d=Math.round((todayEpoch()-s)/1);
+  return Math.max(0,Math.min(DAYS-1,d));
+}
+function bumpStreak(){
+  const t=todayEpoch();
+  if(lastDay===t)return;
+  streak=(lastDay===t-1)?streak+1:1;
+  lastDay=t;
+  localStorage.setItem(LS_STK,String(streak));
+}
+
+/* ============ loader ============ */
+(async function boot(){
+  try{
+    const r=await fetch('bible.json');
+    const total=+r.headers.get('content-length')||0;
+    const reader=r.body.getReader(); let rec=0, chunks=[];
+    while(true){const {done,value}=await reader.read(); if(done)break; chunks.push(value); rec+=value.length;
+      $('ldbar').style.width=total?Math.min(99,rec/total*100)+'%':'70%';}
+    const blob=new Blob(chunks); const txt=await blob.text();
+    bible=JSON.parse(txt); buildIndex();
+    $('ldbar').style.width='100%'; $('ldtxt').textContent='Ready.';
+    if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js')}catch(e){}}
+    await enter();
+    setTimeout(()=>{$('loader').style.opacity='0';setTimeout(()=>{$('loader').style.display='none';$('app').classList.remove('hidden')},450)},250);
+  }catch(e){
+    $('ldtxt').textContent='Could not load the Bible text. Check connection and refresh.';
+  }
+})();
+
+/* ============ auth flow ============ */
+let mode='in';
+function setMode(m){
+  mode=m;
+  $('tab-in').classList.toggle('on',m==='in');$('tab-up').classList.toggle('on',m==='up');
+  show('grp-confirm',m==='up');
+  $('go-btn').textContent=m==='in'?'Sign in':'Create account & begin';
+  $('lb-pw').textContent=m==='in'?'Password':'Choose a password';
+  hideErr();
+}
+$('tab-in').onclick=()=>setMode('in');
+$('tab-up').onclick=()=>setMode('up');
+function toggleEye(input,btn){const on=input.type==='password';input.type=on?'text':'password';btn.textContent=on?'🙈':'👁'}
+$('eye').onclick=()=>toggleEye($('f-pw'),$('eye'));
+$('eye2').onclick=()=>toggleEye($('f-pw2'),$('eye2'));
+function showErr(m){const e=$('err');e.textContent=m;e.style.display='block'}
+function hideErr(){$('err').style.display='none'}
+
+$('go-btn').onclick=async()=>{
+  const em=$('f-email').value.trim().toLowerCase(), pw=$('f-pw').value;
+  hideErr();
+  if(!em){showErr('Please enter your email.');return}
+  if(!pw){showErr('Please enter your password.');return}
+  if(mode==='up'){
+    const pw2=$('f-pw2').value;
+    if(pw.length<6){showErr('Password must be at least 6 characters.');return}
+    if(pw!==pw2){showErr('The two passwords do not match. Please confirm carefully.');return}
+    $('go-btn').textContent='Creating…';
+    const r=await api({act:'signup',email:em,password:pw});
+    $('go-btn').textContent='Create account & begin';
+    if(!r.ok){showErr(r.error||'Could not create the account.');return}
+    onAuthed(r);
+  }else{
+    $('go-btn').textContent='Signing in…';
+    const r=await api({act:'login',email:em,password:pw});
+    $('go-btn').textContent='Sign in';
+    if(!r.ok){showErr(r.error||'Could not sign in.');return}
+    onAuthed(r);
+  }
+};
+function onAuthed(r){
+  token=r.token; email=r.email; started=r.started||Date.now();
+  localStorage.setItem(LS_T,token);
+  prLoad(localStorage.getItem(LS_PR)||'');
+  show('auth',false); show('main',true); show('view-home',true);
+  refreshHome();
+  // pull latest progress from server (server wins on new device)
+  api({act:'load',token}).then(res=>{
+    if(res.ok){
+      const n=prCount();
+      prLoad(res.progress||'');
+      streak=res.streak||streak; lastDay=res.lastDay||0;
+      localStorage.setItem(LS_PR,prB64());
+      if(res.progress&&prCount()>n){toast('Progress synced from your account ✓');}
+      refreshHome();
+    }
+  }).catch(()=>{});
+}
+async function enter(){
+  if(!token){show('auth',true);return}
+  const r=await api({act:'me',token}).catch(()=>null);
+  if(!r||!r.ok){if(r&&r.error)localStorage.removeItem(LS_T);token='';show('auth',true);return}
+  email=r.email; started=r.started;
+  const local=localStorage.getItem(LS_PR)||'';
+  prLoad(local);
+  show('main',true); show('view-home',true); refreshHome();
+  api({act:'load',token}).then(res=>{ if(res.ok&&(res.progress||'').length>=local.length){prLoad(res.progress);localStorage.setItem(LS_PR,prB64());streak=res.streak||streak;lastDay=res.lastDay||0;refreshHome();} }).catch(()=>{});
+}
+$('btn-out').onclick=()=>{localStorage.removeItem(LS_T);token='';location.reload()};
+
+/* ============ sync ============ */
+let syncT;
+function syncNow(){
+  clearTimeout(syncT);
+  syncT=setTimeout(async()=>{
+    if(!token)return;
+    localStorage.setItem(LS_PR,prB64());
+    const r=await api({act:'save',token,progress:prB64(),streak:{streak,lastDay}}).catch(()=>null);
+    if(r&&r.ok)lastSyncOk=Date.now();
+  },700);
+}
+let lastSyncOk=0;
+
+/* ============ home ============ */
+function hourGreet(){const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening'}
+function refreshHome(){
+  $('hdr-email').textContent=email;
+  $('greet').textContent=hourGreet()+', '+(email.split('@')[0]||'friend');
+  curDay=dayIdxNow();
+  $('day-n').textContent=curDay+1;
+  const chs=chaptersOfDay(curDay);
+  if(!chs.length){$('day-ref').textContent='Journey complete — glory to God!';}
+  else{
+    const a=cOfG(chs[0]), b=cOfG(chs[chs.length-1]);
+    const sameBook=bOfG(chs[0])===bOfG(chs[chs.length-1]);
+    $('day-ref').textContent=sameBook? (bible[bOfG(chs[0])].n+' '+a+(chs.length>1?('–'+b):'')) : refOf(chs[0])+' – '+refOf(chs[chs.length-1]);
+    let v=0;chs.forEach(g=>v+=chVerses(g));
+    $('day-versecount').textContent=chs.length+' chapter'+(chs.length>1?'s':'')+' · '+v+' verses';
+  }
+  const done=prCount();
+  const pct=Math.round(done/NCH*1000)/10;
+  $('prog-pct').textContent=pct+'%';
+  $('prog-fill').style.width=pct+'%';
+  $('st-ch').textContent=done;
+  let vr=0;for(let g=0;g<NCH;g++)if(prGet(g))vr+=chVerses(g);
+  $('st-verses').textContent=vr.toLocaleString();
+  let bd=0;bible.forEach((bk,bi)=>{let full=true;for(let c=1;c<=numChOfBook[bi];c++)if(!prGet(gIdx(bi,c))){full=false;break}if(full)bd++});
+  $('st-books').textContent=bd;
+  $('streak-n').textContent=streak;
+  // today chapter list
+  const list=$('today-list');list.innerHTML='';
+  chs.forEach(g=>{
+    const row=document.createElement('div');row.className='chrow'+(prGet(g)?' read':'');
+    row.innerHTML='<div class="dot">'+(prGet(g)?'✓':(cOfG(g)))+'</div><div class="nm">'+refOf(g)+'<small>'+chVerses(g)+' verses</small></div><div class="go">›</div>';
+    row.onclick=()=>{openReader(bOfG(g),cOfG(g),true)};
+    list.appendChild(row);
+  });
+  const allRead=chs.length&&chs.every(prGet);
+  $('btn-continue').textContent=allRead?'📖 Revisit today\'s portion':'📖 Continue reading';
+}
+
+/* ============ reader ============ */
+function openReader(b,c,fromToday){
+  cur={b,c};readingToday=!!fromToday;
+  localStorage.setItem(LS_POS,JSON.stringify(cur));
+  navTo('reader');
+  renderChapter();
+  stopTTS();
+}
+function renderChapter(){
+  const bk=bible[cur.b];const vs=bk.ch[cur.c-1];
+  $('rd-title').textContent=bk.n+' '+cur.c;
+  const box=$('rd-verses');box.innerHTML='';
+  vs.forEach((t,i)=>{
+    const p=document.createElement('p');
+    p.innerHTML='<span class="vn">'+(i+1)+'</span>'+t;
+    box.appendChild(p);
+  });
+  window.scrollTo(0,0);
+  const gi=gIdx(cur.b,cur.c);
+  $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
+}
+$('rd-back').onclick=()=>{stopTTS();navTo('home');refreshHome()};
+$('rd-prev').onclick=()=>{stopTTS();stepChapter(-1)};
+$('rd-next').onclick=()=>{stopTTS();stepChapter(+1,true)};
+function stepChapter(dir,mark){
+  if(mark){const gi=gIdx(cur.b,cur.c);if(!prGet(gi)){prSet(gi);bumpStreak();syncNow();toast(refOf(gi)+' read ✓')}}
+  let bi=cur.b,c=cur.c+dir;
+  if(c<1){bi--;if(bi<0){toast('You are at the very beginning.');c=1;bi=0;return renderChapter()}c=bible[bi].ch.length}
+  else if(c>bible[bi].ch.length){bi++;if(bi>=66){toast('You have completed the whole Bible! 🙌');renderReaderDone();return}c=1}
+  cur={b:bi,c};localStorage.setItem(LS_POS,JSON.stringify(cur));
+  renderChapter();
+}
+function renderReaderDone(){
+  $('rd-verses').innerHTML='<p style="text-align:center;font-size:15px;color:#cfe8db">You have read from Genesis to Revelation. Well done, good and faithful servant. 🙌</p>';
+  $('rd-next').textContent='Back to Today';
+  $('rd-next').onclick=()=>{navTo('home');refreshHome()};
+}
+
+/* read-aloud */
+function stopTTS(){if('speechSynthesis' in window)speechSynthesis.cancel();tts.playing=false;setTtsSt('Read-aloud')}
+function setTtsSt(s){$('tts-st').textContent=s}
+function speakFrom(i){
+  const paras=$('rd-verses').children;
+  if(i>=paras.length){stopTTS();return}
+  [...paras].forEach(p=>p.classList.remove('speaking'));
+  const u=new SpeechSynthesisUtterance(paras[i].innerText.replace(/^\d+\s*/,''));
+  u.rate=parseFloat($('tts-speed').value);
+  u.lang='en-GB';
+  u.onstart=()=>{paras[i].classList.add('speaking');paras[i].scrollIntoView({block:'center',behavior:'smooth'})};
+  u.onend=()=>{if(tts.playing)speakFrom(i+1);else paras[i].classList.remove('speaking')};
+  u.onerror=()=>{tts.playing=false;setTtsSt('Read-aloud')};
+  tts.idx=i;tts.playing=true;setTtsSt('Speaking…');
+  speechSynthesis.speak(u);
+}
+$('tts-play').onclick=()=>{
+  if(!('speechSynthesis' in window)){toast('Speech not supported on this browser.');return}
+  if(tts.playing){stopTTS();return}
+  speakFrom(0);
+  $('tts-play').textContent='⏸ Pause';
+  setTimeout(()=>{if(!tts.playing)$('tts-play').textContent='▶ Listen'},400);
+};
+$('tts-stop').onclick=()=>{stopTTS();$('tts-play').textContent='▶ Listen'};
+$('tts-speed').value=localStorage.getItem(LS_SPD)||'1';
+$('tts-speed').onchange=()=>{localStorage.setItem(LS_SPD,$('tts-speed').value)};
+
+/* chapter sheet from reader */
+$('rd-menu').onclick=()=>openBookSheet(cur.b);
+
+/* ============ books ============ */
+function renderBooks(){
+  const grid=$('books-grid');grid.innerHTML='';
+  bible.forEach((bk,bi)=>{
+    let full=true;for(let c=1;c<=bk.ch.length;c++)if(!prGet(gIdx(bi,c))){full=false;break}
+    const d=document.createElement('div');d.className='bk'+(full?' done':'');
+    d.innerHTML='<div class="n">'+bk.n+'</div><div class="c">'+bk.ch.length+' chapters'+(full?' · complete ✓':'')+'</div>';
+    d.onclick=()=>openBookSheet(bi);
+    grid.appendChild(d);
+  });
+}
+function openBookSheet(bi){
+  const bk=bible[bi];
+  let h='<h3>'+bk.n+'</h3><div class="chgrid">';
+  for(let c=1;c<=bk.ch.length;c++){const gi=gIdx(bi,c);h+='<button class="'+(prGet(gi)?'rd':'')+'" data-b="'+bi+'" data-c="'+c+'">'+c+'</button>'}
+  h+='</div><div class="sheetsub">Gold = already read · tap to open</div>';
+  $('sheet-inner').innerHTML=h;$('sheet').classList.add('open');
+  [...$('sheet-inner').querySelectorAll('button[data-c]')].forEach(b=>b.onclick=()=>{
+    $('sheet').classList.remove('open');
+    openReader(+b.dataset.b,+b.dataset.c,false);
+  });
+}
+$('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('open')};
+
+/* ============ nav ============ */
+function navTo(v){
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');
+  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');
+  if(v==='books')renderBooks();
+}
+$('nv-home').onclick=()=>{stopTTS();navTo('home');refreshHome()};
+$('nv-books').onclick=()=>{stopTTS();navTo('books')};
+$('nv-reader').onclick=()=>{
+  const pos=JSON.parse(localStorage.getItem(LS_POS)||'null');
+  if(pos&&bible[pos.b])openReader(pos.b,pos.c,false);
+  else{const chs=chaptersOfDay(curDay);const g=chs.find(x=>!prGet(x))||chs[0];if(g)openReader(bOfG(g),cOfG(g),true)}
+};
+$('btn-continue').onclick=()=>{
+  const chs=chaptersOfDay(curDay);
+  const g=chs.find(x=>!prGet(x))||chs[0];
+  if(g)openReader(bOfG(g),cOfG(g),true);
+};
+setMode('in');
+window.WC_DEBUG={chaptersOfDay,dayOfG,dayIdxNow,openReader,refreshHome,bible,get cum(){return cum},get dayMap(){return dayMap},get curDay(){return curDay},get cur(){return cur},get prog(){return prog}};
+console.log(APPVER);
+</script>
+</body>
+</html>
