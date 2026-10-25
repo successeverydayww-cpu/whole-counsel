@@ -192,6 +192,23 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .proomlist .pm{background:rgba(255,255,255,.1);border-radius:999px;padding:5px 12px;font-size:13px;color:#e8f5ee}
 .ptime{display:flex;gap:8px;align-items:center;margin-top:10px}
 .ptime input[type=time]{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:10px;padding:7px 10px;font-size:15px;color-scheme:dark}
+.meav{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--em3),var(--em2));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:var(--gold2);border:2px solid rgba(242,201,76,.4);margin-bottom:12px}
+.adrow{display:flex;gap:8px;margin:10px 0}
+.adstat{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;text-align:center}
+.adstat b{display:block;font-size:20px;color:var(--gold2)}
+.adstat span{font-size:11px;color:#9ec9b4}
+.adurow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.adurow .em{color:#cfe8db}
+.adurow .tag{margin-left:auto;font-size:10px;font-weight:800;border-radius:999px;padding:2px 8px}
+.tag.act{background:rgba(110,200,160,.25);color:#a9e3c8}
+.tag.exp{background:rgba(217,93,93,.25);color:#e8a3a3}
+.plan{width:100%;margin-top:10px;font-size:16px}
+.adpend{border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:10px;margin-top:10px}
+.adpend img{width:100%;border-radius:10px;margin-top:8px;cursor:pointer}
+.adpend .badrow{display:flex;gap:8px;margin-top:8px}
+.gnote{background:rgba(242,201,76,.1);border:1px solid rgba(242,201,76,.35);border-radius:12px;padding:9px 12px;font-size:13px;color:#f6e9c8;margin-top:8px}
+.gnote .who{font-size:10.5px;opacity:.75;margin-top:3px}
+.lockcard{font-size:15px;line-height:1.55;color:#e6f4ec}
 .mrow{display:flex;align-items:center;gap:12px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);margin-top:8px}
 .mrow .av{width:38px;height:38px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:linear-gradient(135deg,var(--em3),var(--em2));color:var(--gold2);border:1.5px solid rgba(242,201,76,.4)}
 .mrow .nm{flex:1;min-width:0}
@@ -386,6 +403,13 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
   <div id="view-group" class="hidden fade">
     <div class="greet">Fellowship</div>
     <div class="sub">Read the whole counsel together — encouragement, not competition.</div>
+    <div id="grp-locked" class="hidden">
+      <div class="card daycard">
+        <div class="day">🔒 Fellowship is a members feature</div>
+        <div class="lockcard" style="margin-top:8px">Join the fellowship: read together, chat, share announcements and gather in prayer rooms. Membership unlocks it, along with the Hebrew & Greek Word Study.</div>
+        <button class="btn" id="grp-locked-btn" style="margin-top:12px">✨ Become a member</button>
+      </div>
+    </div>
     <div id="grp-none">
       <div class="card gform">
         <label style="margin-top:0">Start a fellowship</label>
@@ -416,6 +440,8 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
           <button class="btn" id="grp-ptime-clear" style="padding:8px 12px;font-size:12.5px;background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)">Clear</button>
         </div>
         <div id="grp-prayer-missed" class="gpinned hidden" style="margin-top:10px"></div>
+        <div id="grp-notes"></div>
+        <button class="btn hidden" id="grp-note-add" style="margin-top:8px;background:rgba(242,201,76,.15);color:var(--gold2);box-shadow:none;border:1px solid rgba(242,201,76,.4)">📣 Post announcement</button>
       </div>
       <div class="gtabs">
         <button class="gtab on" id="gt-chat">💬 Chat</button>
@@ -488,11 +514,77 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
     </div>
   </div>
 
+  <div id="view-me" class="hidden fade">
+    <div class="greet">You</div>
+    <div class="card daycard">
+      <div class="meav" id="me-av">—</div>
+      <input id="me-name" maxlength="30" placeholder="Your display name">
+      <button class="btn" id="me-save" style="margin-top:8px">Save name</button>
+      <div class="hint" id="me-email" style="margin-top:10px">—</div>
+    </div>
+    <div class="card">
+      <label style="margin-top:0">Membership</label>
+      <div id="me-sub-line" style="font-size:14px;margin:6px 0 10px">—</div>
+      <button class="btn" id="me-sub-btn" style="width:100%">✨ Become a member</button>
+    </div>
+    <div id="me-admin" class="hidden">
+      <div class="card">
+        <label style="margin-top:0">Admin dashboard</label>
+        <div class="adrow">
+          <div class="adstat"><b id="ad-users">0</b><span>readers</span></div>
+          <div class="adstat"><b id="ad-subs">0</b><span>members</span></div>
+          <div class="adstat"><b id="ad-pend">0</b><span>pending</span></div>
+        </div>
+        <input id="ad-q" placeholder="Search users by name or email…">
+        <div id="ad-users-list"></div>
+      </div>
+      <div class="card">
+        <label style="margin-top:0">Subscription requests</label>
+        <div id="ad-pend-list"><div class="hint">None pending.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn" id="me-logout" style="width:100%;background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)">Log out</button>
+      <div class="backlnk" id="me-del" style="color:#d69d69;margin-top:12px">Delete my account</div>
+    </div>
+  </div>
+
+  <div id="view-sub" class="hidden fade">
+    <div class="rd-top"><button class="iconbtn" id="sub-back">←</button><div class="t">Membership</div></div>
+    <div class="card daycard">
+      <div class="day">Become a member</div>
+      <div class="lockcard" style="margin-top:8px">Reading the Word is free forever. Membership unlocks the <b>Word Study</b> (every word in its original Hebrew and Greek) and the <b>Fellowship</b> (groups, chat, announcements and prayer rooms).</div>
+    </div>
+    <div class="card" id="sub-plans">
+      <label style="margin-top:0">Choose your plan</label>
+      <button class="btn plan" id="plan-q">3 months · ₦1,100</button>
+      <button class="btn plan" id="plan-y" style="background:rgba(255,255,255,.08);color:#d8efe2;box-shadow:none;border:1px solid rgba(255,255,255,.14)">1 year · ₦4,400</button>
+    </div>
+    <div class="card hidden" id="sub-pay">
+      <label style="margin-top:0">Pay to this account</label>
+      <div style="font-size:15px;line-height:1.8;margin:6px 0">
+        <b style="color:var(--gold2)" id="sub-acc-name">Success Friday</b><br>
+        Rubies Microfinance Bank<br>
+        <span id="sub-acc-num" style="font-size:19px;font-weight:800;color:var(--gold2)">8881724009</span>
+      </div>
+      <label>Your payment code (use it as the transfer description)</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <b id="sub-txn" style="font-size:20px;color:var(--gold2);letter-spacing:1px">—</b>
+        <button class="btn" id="sub-copy" style="padding:7px 12px;font-size:12.5px">📋 Copy</button>
+      </div>
+      <div class="hint">Transfer the exact amount, then attach your payment screenshot below.</div>
+      <input type="file" id="sub-shot" accept="image/*" style="margin-top:10px">
+      <button class="btn" id="sub-send" style="width:100%;margin-top:10px">✅ I have made this transfer</button>
+    </div>
+    <div class="card hidden" id="sub-status"></div>
+  </div>
+
   <nav class="bottom">
     <button id="nv-home" class="on"><span class="ic">🏠</span>Today</button>
     <button id="nv-books"><span class="ic">📚</span>Books</button>
     <button id="nv-reader"><span class="ic">📖</span>Reader</button>
     <button id="nv-group"><span class="ic">🤝</span>Fellowship<span class="badge hidden" id="grp-badge"></span></button>
+    <button id="nv-me"><span class="ic">👤</span>Me</button>
   </nav>
 </div>
 
@@ -504,7 +596,7 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v3.2';
+const APPVER='whole-counsel v4.0';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -669,6 +761,7 @@ function onAuthed(r){
   show('auth',false); show('landing',false); show('main',true); navTo('home');
   refreshHome();
   warmCache();
+  loadMe();
   loadGroup(true);
   startSlowPoll();
   api({act:'load',token}).then(res=>{
@@ -693,6 +786,7 @@ async function enter(){
   prLoad(local);
   show('main',true); show('view-home',true); refreshHome();
   warmCache();
+  loadMe();
   api({act:'load',token}).then(res=>{
     if(res.ok){
       if((res.progress||'').length>=local.length){
@@ -870,6 +964,12 @@ function prefetchLexicon(){
   setTimeout(()=>ensureLexicon('G'),4000);
 }
 async function openWordSheet(el){
+  if(!isMember()){
+    $('sheet-inner').innerHTML='<h3>Word Study</h3><div class="wsWord" style="margin-top:8px">'+escH(el.textContent)+'</div><div class="lockcard" style="margin:10px 0 14px">🔒 The Hebrew & Greek Word Study is a members feature. Reading is free forever — membership unlocks every word in its original language.</div><div class="gtrow"><button class="btn" id="ws-sub">✨ Become a member</button></div>';
+    $('sheet').classList.add('open');
+    $('ws-sub').onclick=()=>{closeSheet();navTo('sub')};
+    return;
+  }
   window.__lastWordEl=el;
   const nums=el.dataset.s.split('|');
   const word=el.textContent;
@@ -915,6 +1015,7 @@ async function loadGroup(force){
   if(!token)return;
   const r=await api({act:'gMsgs',token}).catch(()=>null);
   if(!r||!r.ok)return;
+  if(r.locked){myGroup=null;gMembers=[];renderLock();return}
   if(!r.group){myGroup=null;renderGroup();return}
   myGroup=r.group;
   chat.msgs=r.group.messages||[];chat.role=r.group.role||'member';chat.prayerTime=r.group.prayerTime;
@@ -932,7 +1033,9 @@ async function loadGroup(force){
 async function pollChat(){
   if(!token)return;
   const r=await api({act:'gMsgs',token}).catch(()=>null);
-  if(!r||!r.ok||!r.group)return;
+  if(!r||!r.ok)return;
+  if(r.locked){myGroup=null;renderLock();$('grp-badge').classList.add('hidden');return}
+  if(!r.group)return;
   myGroup=r.group;
   const h=JSON.stringify(r.group);
   if(h===chat.hash){return}
@@ -954,8 +1057,14 @@ function updBadge(){
   else b.classList.add('hidden');
 }
 function renderGroup(){
+  const locked=!isMember();
+  show('grp-locked',locked);
+  if(locked){show('grp-none',false);show('grp-have',false);return}
   if(myGroup){
     show('grp-none',false);show('grp-have',true);
+    const notes=myGroup.notes||[];
+    $('grp-notes').innerHTML=notes.map(n=>'<div class="gnote">📣 '+escH(n.body)+'<div class="who">'+escH(n.name)+' · '+hm(n.created)+'</div></div>').join('');
+    show('grp-note-add',chat.role!=='member');
     $('grp-name-show').textContent=myGroup.name;
     $('grp-code-show').textContent=myGroup.code;
     const pt=chat.prayerTime;
@@ -1192,6 +1301,149 @@ function stopGroupTimers(){
   $('grp-badge').classList.add('hidden');
 }
 function startSlowPoll(){if(!gSlow)gSlow=setInterval(pollChat,15000)}
+
+/* ============ membership: profile / subscribe / admin ============ */
+const me={name:'',subUntil:0,role:'member',payments:[],plans:null,acc:null,subTxn:null,subPlan:null};
+const isMember=()=>me.role==='owner'||me.subUntil>Date.now();
+const fdate=ts=>new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+async function loadMe(force){
+  if(!token)return;
+  const r=await api({act:'subInfo',token}).catch(()=>null);
+  if(!r||!r.ok)return;
+  me.name=r.name||''; me.subUntil=r.subUntil||0; me.role=r.role||'member';
+  me.payments=r.payments||[]; me.plans=r.plans; me.acc=r.acc;
+  renderMe();
+  if(me.role==='owner'&&force)loadAdmin();
+}
+function renderMe(){
+  const nm=(me.name||'').trim()||(email||'f').split('@')[0];
+  $('me-av').textContent=nm.charAt(0).toUpperCase();
+  $('me-name').value=me.name||'';
+  $('me-email').textContent=email||'';
+  const line=$('me-sub-line'), btn=$('me-sub-btn');
+  if(me.role==='owner'){line.textContent='👑 Owner — full access, always.';btn.classList.add('hidden')}
+  else if(me.subUntil>Date.now()){line.innerHTML='✨ Member until <b>'+fdate(me.subUntil)+'</b>';btn.textContent='Extend membership';btn.classList.remove('hidden')}
+  else{line.textContent='Free reader — reading is free forever.';btn.textContent='✨ Become a member';btn.classList.remove('hidden')}
+  show('me-admin',me.role==='owner');
+}
+$('me-save').onclick=async()=>{
+  const r=await api({act:'setProfile',token,name:$('me-name').value.trim()}).catch(()=>null);
+  if(r&&r.ok){me.name=r.name;toast('Name saved ✓');renderMe();chat.hash='';loadGroup(true)}
+  else toast(r&&r.error||'Could not save.');
+};
+$('me-sub-btn').onclick=()=>navTo('sub');
+$('me-logout').onclick=()=>{localStorage.removeItem(LS_T);token='';location.reload()};
+$('me-del').onclick=async()=>{
+  if(!confirm('Delete your account? Your reading progress will be lost.'))return;
+  if(!confirm('Are you sure? This cannot be undone.'))return;
+  const r=await api({act:'delAccount',token}).catch(()=>null);
+  if(r&&r.ok){localStorage.removeItem(LS_T);token='';location.reload()}
+  else toast(r&&r.error||'Could not delete.');
+};
+/* subscribe flow */
+$('sub-back').onclick=()=>navTo('me');
+function renderSub(){
+  const pend=me.payments.find(p=>p.status==='new'||p.status==='pending');
+  $('sub-plans').classList.toggle('hidden',!!pend);
+  show('sub-pay',!!pend);
+  const st=$('sub-status');
+  if(pend){
+    st.classList.remove('hidden');
+    st.innerHTML='<label style="margin-top:0">Your membership</label><div style="font-size:14px;margin-top:6px">'+(pend.status==='pending'
+      ?'⏳ Payment received — awaiting activation. You\'ll get full access as soon as the leader activates it (usually within hours).'
+      :'Complete your payment: transfer <b>₦'+Number(pend.amount).toLocaleString()+'</b> to <b>Success Friday</b>, Rubies Microfinance Bank, <b>8881724009</b>, using code <b>'+escH(pend.txn)+'</b>, then attach the screenshot below.')+'</div>';
+    me.subTxn=pend.txn;
+    if(pend.status==='pending'){$('sub-shot').classList.add('hidden');$('sub-send').classList.add('hidden')}
+    else{$('sub-shot').classList.remove('hidden');$('sub-send').classList.remove('hidden')}
+    $('sub-txn').textContent=pend.txn;
+  } else if(me.subUntil>Date.now()){
+    st.classList.remove('hidden');
+    st.innerHTML='<div style="font-size:14px">✨ You are a member until <b>'+fdate(me.subUntil)+'</b>. God bless your reading.</div>';
+    $('sub-shot').classList.add('hidden');$('sub-send').classList.add('hidden');
+  } else {
+    st.classList.add('hidden');$('sub-shot').classList.remove('hidden');$('sub-send').classList.remove('hidden');
+  }
+}
+async function startPlan(plan){
+  const r=await api({act:'newSub',token,plan}).catch(()=>null);
+  if(!r||!r.ok){toast(r&&r.error||'Could not start.');return}
+  await loadMe();
+  renderSub();
+  toast('Payment code created: '+r.txn);
+}
+$('plan-q').onclick=()=>startPlan('quarter');
+$('plan-y').onclick=()=>startPlan('year');
+$('sub-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('sub-txn').textContent);toast('Code copied')}catch(e){}};
+$('sub-shot').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  try{
+    const bmp=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(f)});
+    const sc=Math.min(1,800/Math.max(bmp.width,bmp.height));
+    const c=document.createElement('canvas');c.width=bmp.width*sc;c.height=bmp.height*sc;
+    c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    subImgData=c.toDataURL('image/jpeg',.7);
+    toast('Screenshot attached ✓');
+  }catch(err){toast('Could not read that image.')}
+};
+let subImgData='';
+$('sub-send').onclick=async()=>{
+  if(!subImgData){toast('Attach your payment screenshot first.');return}
+  const r=await api({act:'payProof',token,txn:me.subTxn,img:subImgData}).catch(()=>null);
+  if(!r||!r.ok){toast(r&&r.error||'Could not send.');return}
+  subImgData='';
+  await loadMe();renderSub();
+  toast('Sent! Activation usually takes a few hours.');
+};
+/* admin */
+let adQ=null;
+async function loadAdmin(){
+  const r=await api({act:'adminDash',token,q:adQ}).catch(()=>null);
+  if(!r||!r.ok)return;
+  $('ad-users').textContent=r.totals.users;
+  $('ad-subs').textContent=r.totals.subscribers;
+  $('ad-pend').textContent=r.totals.pending;
+  const ul=$('ad-users-list');
+  ul.innerHTML=r.users.map(x=>{
+    const act=Number(x.sub_until)||0;
+    const tag=act>Date.now()?'<span class="tag act">member</span>':'<span class="tag exp">free</span>';
+    return '<div class="adurow"><span class="em">'+escH(x.name||x.email.split('@')[0])+'<br><small style="opacity:.6">'+escH(x.email)+'</small></span>'+tag+'</div>';
+  }).join('')||'<div class="hint">No users found.</div>';
+  const pl=$('ad-pend-list');
+  if(!r.pending.length){pl.innerHTML='<div class="hint">None pending.</div>'}
+  else{
+    pl.innerHTML=r.pending.map(p=>'<div class="adpend" data-pid="'+p.id+'"><div><b>'+escH(p.name)+'</b> · '+escH(p.email)+'</div><div style="font-size:12.5px;margin-top:4px">'+(p.plan==='year'?'1 year':'3 months')+' · ₦'+Number(p.amount).toLocaleString()+' · code '+escH(p.txn)+'</div><img src="'+p.img+'" alt="proof"><div class="badrow"><button class="btn" data-act="ok">✅ Activate</button><button class="btn" data-act="no" style="background:rgba(255,255,255,.08);color:#e8a3a3;box-shadow:none;border:1px solid rgba(255,255,255,.14)">✖ Reject</button></div></div>').join('');
+    pl.querySelectorAll('.adpend').forEach(card=>{
+      const pid=Number(card.dataset.pid);
+      const img=card.querySelector('img');
+      img.onclick=()=>window.open(img.src,'_blank');
+      card.querySelector('[data-act="ok"]').onclick=async()=>{
+        const r2=await api({act:'activateSub',token,pay_id:pid}).catch(()=>null);
+        if(r2&&r2.ok){toast('Activated ✓');loadAdmin()}
+        else toast(r2&&r2.error||'Could not activate.');
+      };
+      card.querySelector('[data-act="no"]').onclick=async()=>{
+        const r2=await api({act:'activateSub',token,pay_id:pid,reject:true}).catch(()=>null);
+        if(r2&&r2.ok){toast('Rejected');loadAdmin()}
+      };
+    });
+  }
+}
+let adQT=null;
+$('ad-q').oninput=()=>{clearTimeout(adQT);adQT=setTimeout(()=>{adQ=$('ad-q').value.trim();loadAdmin()},400)};
+/* fellowship lock + announcements */
+function renderLock(){
+  const locked=!isMember();
+  show('grp-locked',locked);
+  if(locked){show('grp-none',false);show('grp-have',false)}
+}
+$('grp-locked-btn').onclick=()=>navTo('sub');
+$('grp-note-add').onclick=async()=>{
+  const t=prompt('Write the announcement for the fellowship:');
+  if(!t||!t.trim())return;
+  const r=await api({act:'gNote',token,body:t.trim()}).catch(()=>null);
+  if(r&&r.ok){toast('Announcement posted 📣');chat.hash='';pollChat()}
+  else toast(r&&r.error||'Could not post.');
+};
 $('rd-listen').onclick=()=>{
   if(tts.playing){stopTTS();return}
   if(!('speechSynthesis' in window)){toast('Speech not supported on this browser.');return}
@@ -1240,14 +1492,17 @@ $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').classList.remove('ope
 
 /* ============ nav ============ */
 function navTo(v){
-  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-group',v==='group');
-  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');
+  show('view-home',v==='home');show('view-reader',v==='reader');show('view-books',v==='books');show('view-group',v==='group');show('view-me',v==='me');show('view-sub',v==='sub');
+  $('nv-home').classList.toggle('on',v==='home');$('nv-books').classList.toggle('on',v==='books');$('nv-reader').classList.toggle('on',v==='reader');$('nv-group').classList.toggle('on',v==='group');$('nv-me').classList.toggle('on',v==='me');
   if(v==='books')renderBooks();
   if(v==='group')loadGroup();
+  if(v==='me')loadMe(true);
+  if(v==='sub')renderSub();
 }
 $('nv-home').onclick=()=>{stopTTS();navTo('home');refreshHome()};
 $('nv-books').onclick=()=>{stopTTS();navTo('books')};
 $('nv-group').onclick=()=>{stopTTS();navTo('group')};
+$('nv-me').onclick=()=>{stopTTS();navTo('me')};
 $('nv-reader').onclick=async()=>{
   const pos=JSON.parse(localStorage.getItem(LS_POS)||'null');
   if(pos&&pos.b<66)openReader(pos.b,pos.c,false);
