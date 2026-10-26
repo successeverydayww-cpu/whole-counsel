@@ -51,6 +51,15 @@ body{font-family:-apple-system,'Segoe UI',Roboto,system-ui,sans-serif;background
 .btn:active{transform:scale(.97)}
 .lmade{text-align:center;font-size:12px;color:#9ec9b4;margin-top:26px;line-height:1.7}
 .lmade b{color:#d8efe2}
+.legallink{color:#9ec9b4;text-decoration:underline;cursor:pointer;font-size:12px}
+#legal{position:fixed;inset:0;z-index:300;overflow-y:auto;background:radial-gradient(1200px 800px at 50% -10%,#0f4737 0%,#07281e 55%);background-color:#07281e;padding:10px 14px 60px}
+#legal .lbody{max-width:640px;margin:0 auto;font-size:14px;line-height:1.75;color:#e6f2ea}
+#legal h2{color:var(--gold2);font-size:17px;margin:20px 0 6px}
+#legal h3{color:#d8efe2;font-size:15px;margin:14px 0 4px}
+#legal p{margin:6px 0}
+#legal .ct a{display:block;color:var(--gold2);text-decoration:none;padding:11px 14px;border:1px solid rgba(242,201,76,.35);border-radius:12px;margin:8px 0;background:rgba(242,201,76,.08)}
+.agreerow{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:#d8efe2;margin:10px 0 2px}
+.agreerow input{flex:0 0 auto;width:20px;height:20px;margin-top:1px;accent-color:#e2b13c;padding:0;border:0;background:none}
 
 /* auth */
 #auth{max-width:640px;margin:0 auto;padding:18px 16px 50px}
@@ -376,7 +385,49 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 
   <button class="btn" id="btn-start">✨ Get Started</button>
 
-  <div class="lmade">Built by <b>Samuel Amos</b> · KJV text (public domain)<br>"Give attendance to reading." — 1 Timothy 4:13</div>
+  <div class="lmade">Built by <b>Samuel Amos</b> · KJV text (public domain)<br>"Give attendance to reading." — 1 Timothy 4:13<br><span class="legallink" onclick="openLegal('l-terms')">Terms of Use</span> · <span class="legallink" onclick="openLegal('l-privacy')">Privacy Policy</span></div>
+</div>
+
+<!-- LEGAL: Terms of Use + Privacy Policy -->
+<div id="legal" class="hidden">
+  <div class="rd-top">
+    <button class="iconbtn" id="legal-back">←</button>
+    <div class="t">Terms & Privacy</div>
+    <span style="width:42px"></span>
+  </div>
+  <div class="lbody">
+    <h2 id="l-terms">Terms of Use</h2>
+    <p>By using The Whole Counsel you agree to these terms. The app offers free daily Bible reading; Word Study, the e-book library, the AI Librarian, Viva the Bible teacher and Fellowship are membership features.</p>
+    <h3>1. Your account</h3>
+    <p>Keep your password safe. One account per person. You are responsible for what is posted in your fellowship: keep it loving, encouraging and true (Eph 4:29). Leaders may remove messages and members who misuse the fellowship.</p>
+    <h3>2. Membership & payments</h3>
+    <p>Memberships (₦1,100 for 3 months, ₦4,400 for 1 year) are paid by bank transfer to the account shown in the app and verified by our team, usually within minutes. Access lasts for the period paid for. Fees may change; a change never shortens a period you have already paid.</p>
+    <h3>3. The books and teaching</h3>
+    <p>The e-book library shares public-domain Christian classics — legal and free. The Librarian and Viva are AI study helpers: they work from the text, but they are helpers, not authorities; the Word itself is final. Books are for your personal reading only.</p>
+    <h3>4. Fellowship conduct</h3>
+    <p>No abuse, false teaching spread with intent, or illegal content. Groups belong to the community: a group is never deleted — if its owner leaves, a leader is appointed from the remaining members.</p>
+    <h3>5. Service</h3>
+    <p>We work to keep the app available, but we cannot promise uninterrupted service. If something breaks, tell us — we fix things fast.</p>
+
+    <h2 id="l-privacy" style="margin-top:28px">Privacy Policy</h2>
+    <p>We collect only what the app needs: your email (your login), your display name, your reading progress, your membership record, and the messages and videos you post in your fellowship. Reading is private; fellowship content is visible to your fellowship members.</p>
+    <h3>What we never do</h3>
+    <p>We never sell your data, never share your email with third parties, and never post on your behalf. Membership payments are verified by our team only to unlock your access.</p>
+    <h3>Where data lives</h3>
+    <p>Your account and progress are stored on our secure Cloudflare backend. Progress is also saved on your phone so you can read offline.</p>
+    <h3>Deleting your account</h3>
+    <p>You can delete your account from Profile at any time. Your account, progress and fellowship messages are removed from our records. Fellowship groups remain for the members who stay.</p>
+    <h3>Children</h3>
+    <p>The app is suitable for all ages, but members under 13 should join with a parent or guardian's permission.</p>
+
+    <h2 style="margin-top:28px">Contact us</h2>
+    <div class="ct">
+      <a href="https://wa.me/19312715621?text=Hello%20from%20The%20Whole%20Counsel%20app" target="_blank" rel="noopener">💬 Chat with us on WhatsApp</a>
+      <a href="https://wa.me/2349132352500?text=Hello%2C%20I%20am%20messaging%20from%20The%20Whole%20Counsel%20app" target="_blank" rel="noopener">💬 Message the team on WhatsApp</a>
+      <a href="mailto:successeverydayww@gmail.com?subject=Hello%20from%20The%20Whole%20Counsel">✉️ successeverydayww@gmail.com</a>
+    </div>
+    <p style="margin-top:18px;color:#9ec9b4;font-size:12px">These terms were last updated 26 October 2026.</p>
+  </div>
 </div>
 
 <!-- AUTH -->
@@ -420,6 +471,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
         <button class="eyebtn" id="eye2" aria-label="Show password">👁</button>
       </div>
     </div>
+    <div class="agreerow" id="agree-row" style="display:none"><input type="checkbox" id="f-agree"><span>I have read and accept the <span class="legallink" onclick="openLegal('l-terms')">Terms of Use</span> and the <span class="legallink" onclick="openLegal('l-privacy')">Privacy Policy</span>.</span></div>
     <div id="err" class="err"></div>
     <button class="btn" id="go-btn">Sign in</button>
     <div class="hint">Your reading progress is saved to your account and follows you across devices.</div>
@@ -846,7 +898,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.9';
+const APPVER='whole-counsel v6.10';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1055,6 +1107,7 @@ function setMode(m){
   mode=m;
   $('tab-in').classList.toggle('on',m==='in');$('tab-up').classList.toggle('on',m==='up');
   show('grp-confirm',m==='up');
+  const ar=$('agree-row');if(ar)ar.style.display=m==='up'?'flex':'none';
   $('go-btn').textContent=m==='in'?'Sign in':'Create account & begin';
   $('lb-pw').textContent=m==='in'?'Password':'Choose a password';
   hideErr();
@@ -1067,12 +1120,21 @@ $('eye2').onclick=()=>toggleEye($('f-pw2'),$('eye2'));
 function showErr(m){const e=$('err');e.textContent=m;e.style.display='block'}
 function hideErr(){$('err').style.display='none'}
 
+function openLegal(anchor){
+  $('legal').classList.remove('hidden');
+  try{window.scrollTo(0,0)}catch(e){}
+  if(anchor){const el=document.getElementById(anchor);if(el)setTimeout(()=>{try{el.scrollIntoView({block:'start'})}catch(e){}},60)}
+}
+function closeLegal(){$('legal').classList.add('hidden')}
+$('legal-back').onclick=closeLegal;
 $('go-btn').onclick=async()=>{
   const em=$('f-email').value.trim().toLowerCase(), pw=$('f-pw').value;
   hideErr();
   if(!em){showErr('Please enter your email.');return}
   if(!pw){showErr('Please enter your password.');return}
   if(mode==='up'){
+    const ag=$('f-agree');
+    if(!ag||!ag.checked){showErr('Please tick the box to accept the Terms of Use and Privacy Policy.');return}
     const pw2=$('f-pw2').value;
     if(pw.length<6){showErr('Password must be at least 6 characters.');return}
     if(pw!==pw2){showErr('The two passwords do not match. Please confirm carefully.');return}
