@@ -906,7 +906,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.14';
+const APPVER='whole-counsel v6.15';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1771,8 +1771,16 @@ function renderChat(){
   for(const m of chat.msgs){
     const dd=dsep(m.created);
     if(dd!==lastDay){h+='<div class="gday">'+dd+'</div>';lastDay=dd}
-    const foreign=m.lang&&m.lang!==chat.myLang;
+    const foreign=m.lang&&m.lang!==chat.myLang&&m.kind!=='video';
     let body=escH(m.body).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--gold2)">$1</a>');
+    if(m.kind==='video'){
+      const isR2=m.body.startsWith('r2:'),vy=ytId(m.body);
+      body=isR2
+        ?('<video controls preload="metadata" style="max-width:100%;border-radius:12px;background:#000" src="'+API+'v/'+encodeURIComponent(m.body.slice(3))+'"></video>')
+        :(vy
+          ?('<img src="https://i.ytimg.com/vi/'+vy+'/hqdefault.jpg" data-ytc="'+vy+'" alt="video" style="width:100%;max-width:260px;border-radius:12px;cursor:pointer">')
+          :body);
+    }
     let trh='';
     if(foreign){
       if(transCache[m.id]){trh='<div class="gtr">'+escH(transCache[m.id])+'</div><div class="gorig">'+body+'</div>';body=''}
@@ -1788,6 +1796,7 @@ function renderChat(){
       +'<div class="gtime">'+(m.you?('<span class="tick'+(((chat.firstSeen||0)>=m.id)?' on':'')+'">'+(((chat.firstSeen||0)>=m.id)?'✓✓':'✓')+'</span>'):'')+hm(m.created)+'</div></div>';
   }
   box.innerHTML=h||'<div class="chload">No messages yet — say hello to the fellowship!</div>';
+  box.querySelectorAll('img[data-ytc]').forEach(img=>{img.onclick=e=>{e.stopPropagation();const f=document.createElement('iframe');f.src='https://www.youtube-nocookie.com/embed/'+img.dataset.ytc+'?autoplay=1';f.allow='autoplay; encrypted-media; picture-in-picture';f.setAttribute('allowfullscreen','');f.style.cssText='width:100%;max-width:260px;aspect-ratio:16/9;border-radius:12px';img.replaceWith(f)}});
   box.querySelectorAll('.gmsg').forEach(el=>{
     el.onclick=e=>{
       if(e.target.dataset&&e.target.dataset.react){doReact(el.dataset.id,e.target.dataset.react);return}
@@ -1869,10 +1878,19 @@ $('gv-upload-btn').onclick=()=>{
   if(!f){toast('Choose a video from your phone first.');return}
   if(f.size>95*1024*1024){toast('That video is over 95MB — trim it or share a link instead.');return}
   const btn=$('gv-upload-btn');btn.disabled=true;btn.textContent='Uploading… 0%';
+  const t0=Date.now();
   const xhr=new XMLHttpRequest();
-  xhr.open('POST',API+'uploadVideo');
+  xhr.open('POST',API+'uploadVideo?token='+encodeURIComponent(token)+'&name='+encodeURIComponent(f.name||'v.mp4'));
+  xhr.setRequestHeader('Content-Type',f.type||'video/mp4');
   xhr.upload.onprogress=e=>{
-    if(e.lengthComputable){const p=Math.round(e.loaded/e.total*100);btn.textContent='Uploading… '+p+'%';$('gv-prog').style.width=p+'%'}
+    if(e.lengthComputable){
+      const p=Math.round(e.loaded/e.total*100);
+      const secs=Math.max(.1,(Date.now()-t0)/1000);
+      const mbs=(e.loaded/1048576)/secs;
+      const eta=mbs>0?Math.ceil((e.total-e.loaded)/1048576/mbs):0;
+      btn.textContent='Uploading… '+p+'% · '+mbs.toFixed(1)+'MB/s · '+eta+'s left';
+      $('gv-prog').style.width=p+'%';
+    }
   };
   xhr.onload=async()=>{
     btn.disabled=false;btn.textContent='📤 Upload video';
@@ -1887,9 +1905,7 @@ $('gv-upload-btn').onclick=()=>{
     btn.disabled=false;btn.textContent='📤 Upload video';
     toast('Upload failed — check your connection.');
   };
-  const fd=new FormData();
-  fd.append('token',token);fd.append('file',f);
-  xhr.send(fd);
+  xhr.send(f);
 };
 $('gv-btn').onclick=async()=>{
   const u=$('gv-link').value.trim();if(!u){toast('Paste a YouTube link first');return}
