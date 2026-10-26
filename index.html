@@ -902,7 +902,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.12';
+const APPVER='whole-counsel v6.13';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1522,7 +1522,7 @@ async function renderCptFor(cur){
       +(e.d?'<div class="wsDef" style="margin-top:6px">'+escH(String(e.d).slice(0,300))+'</div>':'')
       +(e.r?'<div class="wsUse"><b>Root &amp; origin:</b> '+escH(e.r)+'</div>':'')
       +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
-      +'<div class="wsUse" style="font-size:12.5px">📊 Used <b>'+(c.occ||0).toLocaleString()+' times</b> '+(curH?'in the New Testament':'in the Old Testament')+'</div>';
+      +'<div class="wsUse" style="font-size:12.5px">📊 Used <b>'+(c.occ||0).toLocaleString()+' times in Scripture</b> — Old Testament: <b>'+(curH?0:(c.occ||0)).toLocaleString()+'</b> · New Testament: <b>'+(curH?(c.occ||0):0).toLocaleString()+'</b></div>';
     const refs=occOther&&occOther[c.k]?occOther[c.k].split(';').filter(Boolean).slice(0,8):[];
     if(refs.length){
       h+='<div class="wsRefs" style="margin-top:6px">';
