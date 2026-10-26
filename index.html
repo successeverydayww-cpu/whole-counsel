@@ -164,6 +164,10 @@ nav.bottom button.on{color:var(--gold2);background:rgba(217,169,43,.12)}
 .wsRefs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-height:230px;overflow-y:auto}
 .wsRef2{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:4px 9px;font-size:12px;cursor:pointer;color:#d8efe2}
 .wsRef2:hover{border-color:rgba(242,201,76,.5)}
+.wsSent{margin-top:8px;background:rgba(255,255,255,.05);border-left:3px solid var(--gold2);padding:8px 11px;border-radius:9px;font-size:13.5px;line-height:1.6}
+.wsSentL{display:block;font-size:10.5px;color:#9ec9b4;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+#rd-verses p{cursor:pointer}
+#rd-verses p.vsel{background:rgba(242,201,76,.13);outline:2px solid rgba(242,201,76,.6);outline-offset:2px;border-radius:9px}
 .wsRef2.hl{background:rgba(242,201,76,.25);border-color:var(--gold2)}
 .wsCpt{margin-top:14px;border-top:1px solid rgba(242,201,76,.25);padding-top:12px}
 .wsCptTitle{font-size:12px;font-weight:800;letter-spacing:.6px;color:var(--gold2);margin-bottom:8px}
@@ -902,7 +906,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.13';
+const APPVER='whole-counsel v6.14';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1334,7 +1338,19 @@ function renderChapter(vs){
     p.innerHTML=verseHTML(t,i+1);
     box.appendChild(p);
   });
-  box.querySelectorAll('.wd').forEach(el=>{el.onclick=()=>openWordSheet(el)});
+  box.querySelectorAll('.wd').forEach(el=>{el.onclick=e=>{e.stopPropagation();openWordSheet(el)}});
+  selVerse=0;updListenLbl();
+  [...box.children].forEach((pv,i)=>{
+    pv.onclick=()=>{
+      if(selVerse===i+1){selVerse=0;pv.classList.remove('vsel')}
+      else{
+        if(selVerse&&box.children[selVerse-1])box.children[selVerse-1].classList.remove('vsel');
+        selVerse=i+1;pv.classList.add('vsel');
+        toast('Read-aloud will start from verse '+selVerse+'. Tap again to unselect.');
+      }
+      updListenLbl();
+    };
+  });
   let jumped=false;
   if(pendingVerse){
     const vp=box.children[pendingVerse-1];
@@ -1353,8 +1369,12 @@ function renderChapter(vs){
     }
     pendingVerse=0;pendingStrong='';
   }
-  if(!jumped)window.scrollTo(0,0);
-  if(jumpBack&&!jumped){}
+  if(!jumped){
+    let y=0;
+    if(restoreScrollY!=null){y=restoreScrollY;restoreScrollY=null}
+    else{try{const sy=JSON.parse(localStorage.getItem('wc_scrolly')||'null');if(sy&&sy.b===cur.b&&sy.c===cur.c)y=sy.y}catch(e){}}
+    window.scrollTo(0,y||0);
+  }
   const gi=gIdx(cur.b,cur.c);
   $('rd-next').textContent=prGet(gi)?'Next chapter →':'Mark read → Next';
   const rdRef=chapters[cur.b].n+' '+cur.c;
@@ -1371,7 +1391,7 @@ function returnFromJump(){
   const jb=jumpBack;jumpBack=null;
   const bar=$('jb-bar');if(bar)bar.remove();
   stopTTS();
-  if(jb)openReader(jb.b,jb.c,false);
+  if(jb){restoreScrollY=jb.y||0;openReader(jb.b,jb.c,false)}
   else{navTo('home');refreshHome()}
 }
 $('rd-back').onclick=()=>{
@@ -1394,13 +1414,19 @@ function renderDone(){
   $('rd-next').onclick=()=>{navTo('home');refreshHome()};
 }
 /* read-aloud */
-function stopTTS(){if('speechSynthesis' in window)speechSynthesis.cancel();tts.playing=false;setTtsSt('Read-aloud');$('tts-play').textContent='▶ Listen';$('rd-listen').textContent='🔊 Listen'}
+function stopTTS(){if('speechSynthesis' in window)speechSynthesis.cancel();tts.playing=false;setTtsSt('Read-aloud');updListenLbl()}
+let selVerse=0;
+function updListenLbl(){
+  const from=selVerse?(' from verse '+selVerse):'';
+  $('tts-play').textContent=(tts.playing?'▶':'▶')+' Listen'+from;
+  $('rd-listen').textContent='🔊 Listen'+from;
+}
 function setTtsSt(s){$('tts-st').textContent=s}
 function speakFrom(i){
   const paras=$('rd-verses').children;
   if(i>=paras.length){stopTTS();return}
   [...paras].forEach(p=>p.classList.remove('speaking'));
-  const u=new SpeechSynthesisUtterance(paras[i].innerText.replace(/^\d+\s*/,''));
+  const u=new SpeechSynthesisUtterance(paras[i].textContent.replace(/^\d+\s*/,''));
   u.rate=parseFloat($('tts-speed').value);
   u.lang='en-GB';
   u.onstart=()=>{paras[i].classList.add('speaking');paras[i].scrollIntoView({block:'center',behavior:'smooth'})};
@@ -1412,9 +1438,20 @@ function speakFrom(i){
 $('tts-play').onclick=()=>{
   if(!('speechSynthesis' in window)){toast('Speech not supported on this browser.');return}
   if(tts.playing){stopTTS();return}
-  speakFrom(0);
+  speakFrom(selVerse?selVerse-1:0);
 };
 $('tts-stop').onclick=()=>{stopTTS()};
+let scrollSaveT=null;
+window.addEventListener('scroll',()=>{
+  if(scrollSaveT)return;
+  scrollSaveT=setTimeout(()=>{
+    scrollSaveT=null;
+    try{
+      if(!cur||$('view-reader').classList.contains('hidden'))return;
+      localStorage.setItem('wc_scrolly',JSON.stringify({b:cur.b,c:cur.c,y:window.scrollY||0}));
+    }catch(e){}
+  },400);
+},{passive:true});
 $('tts-speed').value=localStorage.getItem(LS_SPD)||'1';
 $('tts-speed').onchange=()=>{localStorage.setItem(LS_SPD,$('tts-speed').value)};
 /* word study */
@@ -1486,6 +1523,22 @@ async function loadOcc(s){
   };
   bindRefs(box);
 }
+async function renderSentFor(s){
+  const box=$('ws-sent-'+s); if(!box)return;
+  const d=await ensureOcc(s[0]);
+  if(!$('ws-sent-'+s))return;
+  if(!d||!d[s]){box.innerHTML='';return}
+  const p=d[s].split(';')[0].split(':'); const b=+p[0],c=+p[1],v=+p[2];
+  try{
+    const chs=await ensureBook(b);
+    const raw=(chs[c-1]||[])[v-1];
+    if(!$('ws-sent-'+s))return;
+    if(!raw){box.innerHTML='';return}
+    const tmp=document.createElement('div'); tmp.innerHTML=verseHTML(raw,v);
+    tmp.querySelectorAll('.wd').forEach(wd=>{if((wd.dataset.s||'').split('|').includes(s))wd.classList.add('wdhit')});
+    box.innerHTML='<div class="wsSentL">📖 Used in a sentence — '+escH(refLabel(b,c,v))+'</div><div>'+tmp.innerHTML+'</div>';
+  }catch(e){if($('ws-sent-'+s))box.innerHTML=''}
+}
 function kjvTokens(k){
   const t=String(k||'').toLowerCase().replace(/\([^)]*\)/g,' ');
   const out=new Set(t.split(/[^a-z]+/).filter(x=>x.length>1&&!['x','the','and','of','an','to','in','be','is','was','for','with','by','from','or','not','shall','will','it'].includes(x)));
@@ -1523,9 +1576,10 @@ async function renderCptFor(cur){
       +(e.r?'<div class="wsUse"><b>Root &amp; origin:</b> '+escH(e.r)+'</div>':'')
       +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
       +'<div class="wsUse" style="font-size:12.5px">📊 Used <b>'+(c.occ||0).toLocaleString()+' times in Scripture</b> — Old Testament: <b>'+(curH?0:(c.occ||0)).toLocaleString()+'</b> · New Testament: <b>'+(curH?(c.occ||0):0).toLocaleString()+'</b></div>';
+    h+='<div class="wsSent" id="ws-sent-'+escH(c.k)+'"></div>';
     const refs=occOther&&occOther[c.k]?occOther[c.k].split(';').filter(Boolean).slice(0,8):[];
     if(refs.length){
-      h+='<div class="wsRefs" style="margin-top:6px">';
+      h+='<div class="wsRefs" style="margin-top:6px" id="ws-occ-'+escH(c.k)+'">';
       refs.forEach(r=>{const p=r.split(':');h+='<span class="wsRef2" data-b="'+(+p[0])+'" data-c="'+(+p[1])+'" data-v="'+(+p[2])+'">'+escH(refLabel(+p[0],+p[1],+p[2]))+'</span>'});
       h+='</div>';
     }
@@ -1535,20 +1589,22 @@ async function renderCptFor(cur){
   box.innerHTML=h;
   box.querySelectorAll('[data-csay]').forEach(b=>{b.onclick=()=>{const e=lexicon[b.dataset.csay];speakWord((e&&e.t)||b.dataset.csay)}});
   bindRefs(box);
+  top.forEach(c=>{if(c&&c.k)renderSentFor(c.k)});
 }
 function bindRefs(scope){
   scope.querySelectorAll('.wsRef2').forEach(el=>{
     el.onclick=()=>{
-      const sn=(scope.id||'').replace('ws-occ-','')||(el.closest('[id^="ws-occ-"]')||{id:''}).id.replace('ws-occ-','');
+      const holder=el.closest('[id^="ws-occ-"]');
+      const sn=((holder&&holder.id)||scope.id||'').replace('ws-occ-','');
       closeSheet();jumpVerse(+el.dataset.b,+el.dataset.c,+el.dataset.v,sn);
     };
   });
 }
 function isH(s){return s[0]==='H'}
-let jumpBack=null, pendingStrong='';
+let jumpBack=null, pendingStrong='', restoreScrollY=null;
 async function jumpVerse(b,c,v,strong){
-  /* remember the chapter the reader was in so Back returns there, not Home */
-  if(!jumpBack && cur && typeof cur.b==='number' && !$('view-reader').classList.contains('hidden')) jumpBack={b:cur.b,c:cur.c};
+  /* remember the exact spot the reader was in so Back returns there, not the top */
+  if(!jumpBack && cur && typeof cur.b==='number' && !$('view-reader').classList.contains('hidden')) jumpBack={b:cur.b,c:cur.c,y:Math.max(0,(window.scrollY||0)-30)};
   pendingVerse=v; pendingStrong=strong||'';
   await openReader(b,c,true);
 }
@@ -1582,6 +1638,7 @@ async function openWordSheet(el){
       +(e.r?'<div class="wsUse"><b>Root &amp; origin:</b> '+escH(e.r)+'</div>':'')
       +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
       +(e.u?'<div class="wsUse">'+escH(e.u)+'</div>':'')
+      +'<div class="wsSent" id="ws-sent-'+escH(s)+'"></div>'
       +occSection(s)
       +'</div>'
       +'<div class="wsCpt" id="ws-cpt-'+escH(s)+'"></div>';
@@ -1594,7 +1651,7 @@ async function openWordSheet(el){
   nums.forEach(s=>{
     const say=$('ws-say-'+s);
     if(say)say.onclick=()=>speakWord((lexicon[s]&&lexicon[s].t)||s);
-    loadOcc(s);
+    loadOcc(s); renderSentFor(s);
   });
   const vv=$('ws-viva');
   if(vv)vv.onclick=()=>{window.__vivaFrom='word';closeSheet();openViva(window.__vivaCtxWord||'')};
@@ -2474,7 +2531,7 @@ $('bk-tts-speed').onchange=()=>{if(bkTTS)stopBkTTS()};
 $('rd-listen').onclick=()=>{
   if(tts.playing){stopTTS();return}
   if(!('speechSynthesis' in window)){toast('Speech not supported on this browser.');return}
-  speakFrom(0);
+  speakFrom(selVerse?selVerse-1:0);
 };
 $('rd-menu').onclick=()=>openBookSheet(cur.b);
 
