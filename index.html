@@ -902,7 +902,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.11';
+const APPVER='whole-counsel v6.12';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -1491,27 +1491,26 @@ function kjvTokens(k){
   const out=new Set(t.split(/[^a-z]+/).filter(x=>x.length>1&&!['x','the','and','of','an','to','in','be','is','was','for','with','by','from','or','not','shall','will','it'].includes(x)));
   return out;
 }
-async function renderCounterparts(nums){
-  const box=$('ws-cpt'); if(!box)return;
-  const cur=nums[0]; const curH=isH(cur); const other=curH?'G':'H';
-  const mine=new Set();
-  nums.forEach(n=>{const e=lexicon[n]; if(e&&e.k) kjvTokens(e.k).forEach(t=>mine.add(t))});
-  if(!mine.size){box.innerHTML='';return}
-  const okLex=await ensureLexicon(other); if(!okLex||!$('ws-cpt'))return;
+async function renderCptFor(cur){
+  const box=$('ws-cpt-'+cur); if(!box)return;
+  const curH=isH(cur); const other=curH?'G':'H';
+  const me=kjvTokens(lexicon[cur]&&lexicon[cur].k);
+  if(!me.size){box.innerHTML='';return}
+  const okLex=await ensureLexicon(other); if(!okLex||!$('ws-cpt-'+cur))return;
+  const occOther=await ensureOcc(other); if(!$('ws-cpt-'+cur))return;
   const lexOther=Object.keys(lexicon).filter(k=>k[0]===other);
-  const occOther=await ensureOcc(other); if(!$('ws-cpt'))return;
   const scored=[];
   for(const k of lexOther){
     const e=lexicon[k]; if(!e||!e.k)continue;
     const tk=kjvTokens(e.k); let shared=0;
-    mine.forEach(t=>{if(tk.has(t))shared++});
+    me.forEach(t=>{if(tk.has(t))shared++});
     if(shared>0){
       const occ=occOther&&occOther[k]?occOther[k].split(';').filter(Boolean).length:0;
       scored.push({k,shared,occ});
     }
   }
   scored.sort((a,b)=>b.shared-a.shared||b.occ-a.occ);
-  const top=scored.slice(0,3);
+  const top=scored.slice(0,2);
   if(!top.length){box.innerHTML='';return}
   let h='<div class="wsCptTitle">'+(curH?'✝ THE SAME WORD IN THE NEW TESTAMENT — GREEK':'🕎 THE SAME WORD IN THE OLD TESTAMENT — HEBREW')+'</div>';
   top.forEach(c=>{
@@ -1520,9 +1519,11 @@ async function renderCounterparts(nums){
       +'<div class="wsBad '+(curH?'g':'h')+'">'+(curH?'GREEK':'HEBREW')+' · '+escH(c.k)+'</div>'
       +'<div class="wsOrig"'+(curH?' lang="el"':' dir="rtl" lang="he"')+'>'+escH(e.w)+'</div>'
       +(e.t?'<div class="wsTr"><b>'+escH(e.t)+'</b>'+(e.p?' · '+escH(e.p):'')+'</div><button class="wsSpeak" data-csay="'+escH(c.k)+'">🔊 Hear it pronounced</button>':'')
-      +(e.d?'<div class="wsDef" style="margin-top:6px">'+escH(String(e.d).slice(0,220))+'</div>':'')
+      +(e.d?'<div class="wsDef" style="margin-top:6px">'+escH(String(e.d).slice(0,300))+'</div>':'')
+      +(e.r?'<div class="wsUse"><b>Root &amp; origin:</b> '+escH(e.r)+'</div>':'')
+      +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
       +'<div class="wsUse" style="font-size:12.5px">📊 Used <b>'+(c.occ||0).toLocaleString()+' times</b> '+(curH?'in the New Testament':'in the Old Testament')+'</div>';
-    const refs=occOther&&occOther[c.k]?occOther[c.k].split(';').filter(Boolean).slice(0,6):[];
+    const refs=occOther&&occOther[c.k]?occOther[c.k].split(';').filter(Boolean).slice(0,8):[];
     if(refs.length){
       h+='<div class="wsRefs" style="margin-top:6px">';
       refs.forEach(r=>{const p=r.split(':');h+='<span class="wsRef2" data-b="'+(+p[0])+'" data-c="'+(+p[1])+'" data-v="'+(+p[2])+'">'+escH(refLabel(+p[0],+p[1],+p[2]))+'</span>'});
@@ -1530,7 +1531,7 @@ async function renderCounterparts(nums){
     }
     h+='</div>';
   });
-  h+='<div class="sheetsub">Matched by shared KJV renderings · Strong\'s numbering</div>';
+  h+='<div class="sheetsub">Matched by shared KJV renderings · tap a reference to open that verse</div>';
   box.innerHTML=h;
   box.querySelectorAll('[data-csay]').forEach(b=>{b.onclick=()=>{const e=lexicon[b.dataset.csay];speakWord((e&&e.t)||b.dataset.csay)}});
   bindRefs(box);
@@ -1582,11 +1583,11 @@ async function openWordSheet(el){
       +(e.k?'<div class="wsUse"><b>KJV renderings:</b> '+escH(e.k)+'</div>':'')
       +(e.u?'<div class="wsUse">'+escH(e.u)+'</div>':'')
       +occSection(s)
-      +'</div>';
+      +'</div>'
+      +'<div class="wsCpt" id="ws-cpt-'+escH(s)+'"></div>';
   }
   window.__vivaCtxWord="The reader tapped the English word '"+word+"' in "+ref+" (Strong's "+nums.join(', ')+
     "). Lexicon: "+JSON.stringify(nums.map(n=>lexicon[n]).filter(Boolean)).slice(0,1500);
-  h+='<div id="ws-cpt"></div>';
   h+='<button class="btn" id="ws-viva" style="width:100%;margin-top:10px">🎓 Ask for deeper teaching</button>';
   h+='<div class="sheetsub">Strong\'s Exhaustive Concordance numbering · public-domain lexicon</div>';
   $('sheet-inner').innerHTML=h;
@@ -1597,7 +1598,7 @@ async function openWordSheet(el){
   });
   const vv=$('ws-viva');
   if(vv)vv.onclick=()=>{window.__vivaFrom='word';closeSheet();openViva(window.__vivaCtxWord||'')};
-  renderCounterparts(nums);
+  nums.forEach(s=>renderCptFor(s));
 }
 
 /* fellowship */
