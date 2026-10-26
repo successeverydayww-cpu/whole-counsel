@@ -631,6 +631,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
   </div>
 
   <div id="fl-hub" class="hidden flwrap">
+    <div id="fl-stale" class="gnote hidden" style="margin:8px 4px 0;background:rgba(242,201,76,.12);cursor:default">📡 Reconnecting… your fellowship is safe. Messages will refresh when you're back online.</div>
     <div class="card daycard" style="margin-top:8px">
       <div class="ref" id="grp-name-show">—</div>
       <div class="hint" id="fl-subline" style="margin-top:4px">—</div>
@@ -875,7 +876,13 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
       <div style="font-size:15px;line-height:1.8;margin:6px 0">
         <b style="color:var(--gold2)" id="sub-acc-name">Success Friday</b><br>
         Rubies Microfinance Bank<br>
-        <span id="sub-acc-num" style="font-size:19px;font-weight:800;color:var(--gold2)">8881724009</span>
+        <span style="display:flex;gap:8px;align-items:center">
+          <span id="sub-acc-num" style="font-size:19px;font-weight:800;color:var(--gold2)">8881724009</span>
+          <button class="btn" id="sub-copy-acc" style="padding:7px 12px;font-size:12.5px">📋 Copy account</button>
+        </span>
+      </div>
+      <div id="sub-count-row" style="font-size:14.5px;margin:8px 0;padding:9px 12px;border:1px solid rgba(255,215,0,.3);border-radius:12px;background:rgba(255,215,0,.07)">
+        ⏳ Complete your transfer within <b id="sub-count" style="color:var(--gold2);font-size:16px">20:00</b>
       </div>
       <label>Your payment code (use it as the transfer description)</label>
       <div style="display:flex;gap:8px;align-items:center">
@@ -906,14 +913,16 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.15';
+const APPVER='whole-counsel v6.16';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
 /* ============ helpers ============ */
 const $=id=>document.getElementById(id);
-const show=(el,on)=>$(el).classList.toggle('hidden',!on);
+const show=(el,on)=>{const n=$(el);if(n)n.classList.toggle('hidden',!on)};
 let toastT;
+let lastToastOnce=0;
+function toastOnce(msg){const n=Date.now();if(n-lastToastOnce>15000){lastToastOnce=n;toast(msg)}}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200)}
 async function api(body){
   try{
@@ -1185,8 +1194,21 @@ function onAuthed(r){
 async function enter(){
   if(!token){show('landing',true);return}
   const r=await api({act:'me',token}).catch(()=>null);
-  if(!r||!r.ok){if(r&&r.error&&r.error.includes('Session'))localStorage.removeItem(LS_T);if(!r)token='';if(!r||!r.ok){token='';show('landing',true);return}}
+  if(r&&r.error&&r.error.includes('Session')){localStorage.removeItem(LS_T);token='';show('landing',true);return}
+  if(!r||!r.ok){
+    // network down: enter optimistically with cached progress + membership so the app (and fellowship) stays usable
+    started=Number(localStorage.getItem('wc_started')||Date.now());
+    hydrateMeCache();
+    const local0=localStorage.getItem(LS_PR)||'';
+    prLoad(local0);
+    show('auth',false);show('landing',false);show('main',true);show('view-home',true);refreshHome();
+    setTimeout(restoreView,60);
+    warmCache();loadMe();loadGroup(true);startSlowPoll();
+    toastOnce('Offline — showing your saved reading plan');
+    return;
+  }
   email=r.email; started=r.started;
+  try{localStorage.setItem('wc_started',String(started))}catch(e){}
   const local=localStorage.getItem(LS_PR)||'';
   prLoad(local);
   show('main',true); show('view-home',true); refreshHome();
@@ -1666,16 +1688,34 @@ const transCache={};
 const dsep=ts=>{const d=new Date(ts),t=new Date();const dd=new Date(d.getFullYear(),d.getMonth(),d.getDate()),td=new Date(t.getFullYear(),t.getMonth(),t.getDate());const diff=Math.round((td-dd)/864e5);if(diff===0)return 'Today';if(diff===1)return 'Yesterday';return d.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})};
 const hm=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 function ytId(u){const m=String(u||'').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
+function cacheGroupOff(){try{localStorage.removeItem('wc_group')}catch(e){}}
+function cacheGroup(){try{if(myGroup)localStorage.setItem('wc_group',JSON.stringify({code:myGroup.code,name:myGroup.name}))}catch(e){}}
+function hydrateGroupCache(){
+  if(myGroup)return false;
+  try{const c=JSON.parse(localStorage.getItem('wc_group')||'null');
+    if(c&&c.code&&c.name){myGroup={code:c.code,name:c.name,stale:true};return true}
+  }catch(e){}
+  return false;
+}
 async function loadGroup(force){
   if(!token)return;
-  const r=await api({act:'gMsgs',token}).catch(()=>null);
-  if(!r||!r.ok)return;
-  if(r.locked){myGroup=null;gMembers=[];renderLock();return}
-  if(!r.group){myGroup=null;renderGroup();return}
-  myGroup=r.group;
+  hydrateGroupCache();
+  let r=null;
+  for(let i=0;i<3;i++){
+    r=await api({act:'gMsgs',token}).catch(()=>null);
+    if(r&&r.ok)break;
+    if(i<2)await new Promise(res=>setTimeout(res,1500));
+  }
+  if(!r||!r.ok){
+    if(myGroup){toastOnce('Reconnecting… your fellowship is safe');renderFellow()}
+    return;
+  }
+  if(r.locked){myGroup=null;gMembers=[];cacheGroupOff();renderLock();return}
+  if(!r.group){myGroup=null;cacheGroupOff();renderGroup();return}
+  myGroup=r.group;delete myGroup.stale;cacheGroup();
   chat.msgs=r.group.messages||[];chat.role=r.group.role||'member';chat.prayerTime=r.group.prayerTime;
   chat.myLang=r.group.myLang||'en';chat.unread=r.group.unread||0;chat.lastPrayer=r.group.lastPrayer;
-  $('grp-lang').value=chat.myLang;
+  const gl=$('grp-lang');if(gl)gl.value=chat.myLang;
   const f=await api({act:'groupFeed',token}).catch(()=>null);
   if(f&&f.ok&&f.group)gMembers=f.group.members;
   groupLoaded=true;
@@ -1691,7 +1731,7 @@ async function pollChat(){
   if(!r||!r.ok)return;
   if(r.locked){myGroup=null;renderLock();$('grp-badge').classList.add('hidden');return}
   if(!r.group)return;
-  myGroup=r.group;
+  myGroup=r.group;cacheGroup();
   const h=JSON.stringify(r.group);
   if(h===chat.hash){return}
   chat.hash=h;
@@ -1732,6 +1772,7 @@ function renderFellow(){
   show('fl-members',inGroup&&flScreen==='members');
   if(locked)return;
   show('fl-mine-card',!!myGroup);
+  show('fl-stale',!!(myGroup&&myGroup.stale));
   if(!myGroup){flGo('start');return}
   $('fl-title').textContent=flScreen==='start'?'Fellowship':flScreen==='hub'?myGroup.name:flScreen==='chat'?'Chats':flScreen==='videos'?'Group videos':flScreen==='upload'?'Upload video':flScreen==='ann'?'Announcements & schedule':'Members & admins';
   $('fl-mine-name').textContent=myGroup.name;
@@ -2078,10 +2119,12 @@ function menuSheet(title,items){
   $('sheet').classList.add('open');
   document.querySelectorAll('#sheet-inner [data-mi]').forEach(b=>b.onclick=()=>{closeSheet();items[Number(b.dataset.mi)].fn()});
 }
+let fellowLoading=false;
 function openFellow(){
   show('view-fellow',true);
   flScreen=myGroup?'hub':'start';
   renderFellow();
+  if(!myGroup&&isMember()&&!fellowLoading){fellowLoading=true;loadGroup(true).catch(()=>{}).finally(()=>{fellowLoading=false})}
   markNotesSeen();
   chat.unread=0;updBadge();
 }
@@ -2189,18 +2232,44 @@ function renderAnnBanner(){
 $('ann-banner').onclick=()=>openFellow();
 
 /* ============ membership: profile / subscribe / admin ============ */
+let payTimer=null;
+function stopPayCountdown(){if(payTimer){clearInterval(payTimer);payTimer=null}}
+function startPayCountdown(created){
+  stopPayCountdown();
+  let el=$('sub-count');
+  if(!el){$('sub-count-row').innerHTML='⏳ Complete your transfer within <b id="sub-count" style="color:var(--gold2);font-size:16px">20:00</b>';el=$('sub-count')}
+  if(!el)return;
+  const tick=()=>{
+    const left=Math.floor((created+20*60*1000-Date.now())/1000);
+    if(left<=0){
+      stopPayCountdown();
+      $('sub-count-row').innerHTML='⏰ <b style="color:#ff9b9b">This payment window closed (20 minutes).</b> Your old code is void — tap below for a fresh one.';
+      const regen=document.createElement('button');regen.className='btn';regen.textContent='🔄 Generate a new code';regen.style.cssText='width:100%;margin-top:10px';
+      regen.onclick=async()=>{regen.textContent='Generating…';const r=await api({act:'newSub',token,plan:me.subPlan}).catch(()=>null);if(r&&r.ok){await loadMe(true).catch(()=>null);renderSub();toast('New code created — transfer within 20 minutes ✓')}else{regen.textContent='🔄 Generate a new code';toast((r&&r.error)||'Could not create code — try again')}};
+      $('sub-count-row').appendChild(regen);
+      $('sub-shot').classList.add('hidden');$('sub-send').classList.add('hidden');
+      return;
+    }
+    const m=String(Math.floor(left/60)).padStart(2,'0'),sec=String(left%60).padStart(2,'0');
+    el.textContent=m+':'+sec;
+    if(left<300)el.style.color='#ff9b9b';
+  };
+  tick();payTimer=setInterval(tick,1000);
+}
 const me={name:'',subUntil:0,role:'member',payments:[],plans:null,acc:null,subTxn:null,subPlan:null,photo:null};
 const isMember=()=>me.role==='owner'||me.subUntil>Date.now();
 const fdate=ts=>new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
 async function loadMe(force){
   if(!token)return;
   const r=await api({act:'subInfo',token}).catch(()=>null);
-  if(!r||!r.ok)return;
+  if(!r||!r.ok){hydrateMeCache();return}
   me.name=r.name||''; me.subUntil=r.subUntil||0; me.role=r.role||'member';
   me.payments=r.payments||[]; me.plans=r.plans; me.acc=r.acc; me.photo=r.photo||null;
-  renderMe();
+  cacheMe();renderMe();
   if(me.role==='owner'&&force)loadAdmin();
 }
+function cacheMe(){try{localStorage.setItem('wc_me',JSON.stringify({subUntil:me.subUntil,role:me.role}))}catch(e){}}
+function hydrateMeCache(){try{const c=JSON.parse(localStorage.getItem('wc_me')||'null');if(c&&(c.role==='owner'||c.subUntil>Date.now())){me.subUntil=c.subUntil||0;me.role=c.role||'member'}}catch(e){}}
 function paintUserPhoto(){
   const lg=$('hdr-logo');
   if(me.photo){lg.innerHTML='<img class="hdrav" src="'+me.photo+'">'}
@@ -2281,9 +2350,10 @@ function renderSub(){
       ?'⏳ Payment received — awaiting activation. You\'ll get full access as soon as the leader activates it (usually within hours).'
       :'Complete your payment: transfer <b>₦'+Number(pend.amount).toLocaleString()+'</b> to <b>Success Friday</b>, Rubies Microfinance Bank, <b>8881724009</b>, using code <b>'+escH(pend.txn)+'</b>, then attach the screenshot below.')+'</div>';
     me.subTxn=pend.txn;
-    if(pend.status==='pending'){$('sub-shot').classList.add('hidden');$('sub-send').classList.add('hidden')}
-    else{$('sub-shot').classList.remove('hidden');$('sub-send').classList.remove('hidden')}
+    if(pend.status==='pending'){$('sub-shot').classList.add('hidden');$('sub-send').classList.add('hidden');$('sub-count-row').classList.add('hidden')}
+    else{$('sub-shot').classList.remove('hidden');$('sub-send').classList.remove('hidden');$('sub-count-row').classList.remove('hidden')}
     $('sub-txn').textContent=pend.txn;
+    startPayCountdown(pend.created);
   } else if(me.subUntil>Date.now()){
     st.classList.remove('hidden');
     st.innerHTML='<div style="font-size:14px">✨ You are a member until <b>'+fdate(me.subUntil)+'</b>. God bless your reading.</div>';
@@ -2302,6 +2372,7 @@ async function startPlan(plan){
 $('plan-q').onclick=()=>startPlan('quarter');
 $('plan-y').onclick=()=>startPlan('year');
 $('sub-copy').onclick=async()=>{try{await navigator.clipboard.writeText($('sub-txn').textContent);toast('Code copied')}catch(e){}};
+$('sub-copy-acc').onclick=async()=>{try{await navigator.clipboard.writeText($('sub-acc-num').textContent);toast('Account number copied ✓')}catch(e){toast('Copy failed — long-press the number to copy')}};
 $('sub-shot').onchange=async e=>{
   const f=e.target.files&&e.target.files[0];if(!f)return;
   try{
@@ -2362,7 +2433,7 @@ $('ad-q').oninput=()=>{clearTimeout(adQT);adQT=setTimeout(()=>{adQ=$('ad-q').val
 function renderLock(){
   const locked=!isMember();
   show('grp-locked',locked);
-  if(locked){show('grp-none',false);show('grp-have',false)}
+  if(locked){show('fl-start',false);show('fl-hub',false)}
 }
 $('grp-locked-btn').onclick=()=>navTo('sub');
 $('grp-note-add').onclick=async()=>{
