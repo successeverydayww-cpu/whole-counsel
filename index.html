@@ -304,7 +304,30 @@ body.kbopen .libbar{bottom:var(--kb,0px)!important}
 .ginbar input{height:48px;border-radius:24px;padding:0 16px;font-size:16px;background:rgba(10,26,20,.96);border:1px solid rgba(242,201,76,.45)}
 .ginbar .btn{border-radius:24px}
 body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!important}
-</style>
+
+/* ---- My PDF library ---- */
+#pdfCard .pdfrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(10,46,32,.72);border:1px solid rgba(255,255,255,.09);margin-bottom:8px}
+#pdfCard .pdfrow .meta{flex:1;min-width:0}
+#pdfCard .pdfrow .nm{font-weight:700;font-size:14px;color:#f3ead0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pdfCard .pdfrow .sub2{font-size:11.5px;color:#9ec9b4;margin-top:2px}
+#pdfCard .pdfrow .pct{font-size:12px;font-weight:800;color:var(--gold2);min-width:42px;text-align:right}
+#pdfCard .bar{height:5px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:6px;overflow:hidden}
+#pdfCard .bar i{display:block;height:100%;background:var(--gold2);border-radius:99px}
+#pdfCard .avg{font-size:12px;color:#9ec9b4;margin:2px 0 10px}
+#pdfOverlay{position:fixed;inset:0;background:#06231a;z-index:70;display:none;flex-direction:column}
+#pdfOverlay.on{display:flex}
+#pdfBar{display:flex;align-items:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-top));border-bottom:1px solid rgba(255,255,255,.1);background:rgba(7,40,30,.96)}
+#pdfBar .ttl{flex:1;font-weight:700;font-size:13.5px;color:#f3ead0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pdfBar button{background:none;border:none;color:#f2c94c;font-size:18px;padding:6px 8px;cursor:pointer}
+#pdfWrap{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:8px;display:flex;justify-content:center;align-items:flex-start}
+#pdfWrap canvas{max-width:100%;height:auto;box-shadow:0 6px 24px rgba(0,0,0,.45);border-radius:6px;background:#fff}
+#pdfFoot{display:flex;align-items:center;gap:8px;padding:8px 10px calc(10px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.1);background:rgba(7,40,30,.96)}
+#pdfFoot button{background:rgba(242,201,76,.14);border:1px solid rgba(242,201,76,.4);color:#f2c94c;font-weight:800;font-size:13px;padding:9px 12px;border-radius:12px;cursor:pointer}
+#pdfFoot button:disabled{opacity:.4}
+#pdfPos{flex:1;text-align:center;font-size:12.5px;color:#cfe8db;font-weight:700}
+#pdfProg{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.12)}
+#pdfProg i{display:block;height:100%;background:var(--gold2);width:0}
+#pdfLib{position:fixed;inset:0;background:#06231a;z-index:66;display:none;overflow:auto;padding:10px 12px calc(90px + env(safe-area-inset-bottom))}#pdfLib.on{display:block}#pdfFab{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:67;width:52px;height:52px;border-radius:50%;border:1px solid rgba(242,201,76,.45);background:rgba(13,54,41,.96);color:#f2c94c;font-size:22px;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer}</style>
 </head>
 <body>
 
@@ -735,6 +758,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
       <label style="margin-top:0">Results</label>
       <div id="eb-list"></div>
     </div>
+        
     <div class="card">
       <label style="margin-top:0">My books</label>
       <div id="eb-mine"></div>
@@ -913,7 +937,7 @@ body.kbopen .bnav,body.kbopen #bnav,body.kbopen nav.bottom{display:none!importan
 <script>
 /* ============ config ============ */
 const API='https://whole-counsel-api.successeverydayww-cpu.workers.dev/';
-const APPVER='whole-counsel v6.16';
+const APPVER='whole-counsel v6.17';
 const LS_T='wc_token', LS_PR='wc_progress', LS_STK='wc_streak', LS_POS='wc_pos', LS_SPD='wc_speed', LS_PACE='wc_pace';
 const NCH=1189, NTOTV=31102, DAYS=365;
 
@@ -2818,5 +2842,201 @@ setMode('in');
 window.WC_DEBUG={todayChs,firstUnread,openReader,refreshHome,ensureBook,get chapters(){return chapters},get cum(){return cum},get pace(){return pace},get cur(){return cur},get prog(){return prog}};
 console.log(APPVER);
 </script>
-</body>
+
+<div id="pdfOverlay">
+  <div id="pdfBar">
+    <button id="pdfX">✕</button>
+    <div class="ttl" id="pdfTtl">PDF</div>
+    <button id="pdfFinish" title="Mark finished">✓ Finish</button>
+  </div>
+  <div id="pdfWrap"><canvas id="pdfCv"></canvas></div>
+  <div id="pdfFoot">
+    <button id="pdfPrev">‹ Prev</button>
+    <div id="pdfPos">Page 1 of 1 · 0%</div>
+    <button id="pdfNext">Next ›</button>
+  </div>
+  <div id="pdfProg"><i></i></div>
+</div>
+
+<script>
+/* ================= My PDF library (local, offline, resumable) ================= */
+(function(){
+  var DB='wc_pdf_db', STORE='books', dbp=null;
+  function openDB(){ if(dbp) return dbp; dbp=new Promise(function(res,rej){
+      var r=indexedDB.open(DB,1);
+      r.onupgradeneeded=function(){ var d=r.result; if(!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE,{keyPath:'id'}); };
+      r.onsuccess=function(){res(r.result)}; r.onerror=function(){rej(r.error)};
+  }); return dbp; }
+  function all(){ return openDB().then(function(db){ return new Promise(function(res,rej){
+      var t=db.transaction(STORE,'readonly').objectStore(STORE).getAll();
+      t.onsuccess=function(){res(t.result||[])}; t.onerror=function(){rej(t.error)};
+  })}); }
+  function put(b){ return openDB().then(function(db){ return new Promise(function(res,rej){
+      var t=db.transaction(STORE,'readwrite').objectStore(STORE).put(b);
+      t.onsuccess=function(){res(b)}; t.onerror=function(){rej(t.error)};
+  })}); }
+  function get(id){ return openDB().then(function(db){ return new Promise(function(res,rej){
+      var t=db.transaction(STORE,'readonly').objectStore(STORE).get(id);
+      t.onsuccess=function(){res(t.result)}; t.onerror=function(){rej(t.error)};
+  })}); }
+  function del(id){ return openDB().then(function(db){ return new Promise(function(res,rej){
+      var t=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);
+      t.onsuccess=function(){res()}; t.onerror=function(){rej(t.error)};
+  })}); }
+  function el(id){ return document.getElementById(id); }
+  function toastLocal(m){ try{ if(typeof toast==='function'){toast(m);return;} }catch(e){} var t=el('toast'); if(t){t.textContent=m;t.style.opacity=1;setTimeout(function(){t.style.opacity=0},2200);} }
+
+  function pctOf(b){ if(!b.pages) return 0; if(b.done) return 100; var v=Math.round(((b.page||1)/b.pages)*100); if(v>99)v=99; return Math.max(0,v); }
+
+  function paint(){
+    var box=el('pdf-mine'); if(!box) return;
+    all().then(function(list){
+      box.innerHTML='';
+      if(!list.length){ box.innerHTML='<div class="hint">No PDFs yet. Tap “Add PDFs from my device”.</div>'; el('pdf-avg').textContent='Upload any PDF. It stays on this device and remembers exactly where you stopped.'; return; }
+      list.sort(function(a,b){return (b.added||0)-(a.added||0)});
+      var sum=0;
+      list.forEach(function(b){
+        var p=pctOf(b); sum+=p;
+        var row=document.createElement('div'); row.className='pdfrow';
+        var meta=document.createElement('div'); meta.className='meta';
+        var nm=document.createElement('div'); nm.className='nm'; nm.textContent=b.name;
+        var sub=document.createElement('div'); sub.className='sub2';
+        sub.textContent=(b.pages? b.pages+' pages · ':'')+(b.done?'Completed':'Page '+(b.page||1))+' · '+(b.size>=1048576? (Math.round(b.size/104857.6)/10+' MB') : (Math.max(1,Math.round(b.size/1024))+' KB'));
+        var bar=document.createElement('div'); bar.className='bar'; var fill=document.createElement('i'); fill.style.width=p+'%'; bar.appendChild(fill);
+        meta.appendChild(nm); meta.appendChild(sub); meta.appendChild(bar);
+        var pc=document.createElement('div'); pc.className='pct'; pc.textContent=p+'%';
+        var openBtn=document.createElement('button'); openBtn.className='iconbtn'; openBtn.textContent=b.done?'↻':'▶'; openBtn.title=b.done?'Read again from the start':'Continue';
+        openBtn.onclick=function(){ if(b.done){ b.page=1; b.done=false; put(b).then(function(){ openBook(b.id); }); } else { openBook(b.id); } };
+        var rm=document.createElement('button'); rm.className='iconbtn'; rm.textContent='🗑'; rm.title='Remove';
+        rm.onclick=function(){ if(confirm('Remove “'+b.name+'” from this device?')) del(b.id).then(function(){ paint(); }); };
+        row.appendChild(meta); row.appendChild(pc); row.appendChild(openBtn); row.appendChild(rm);
+        box.appendChild(row);
+      });
+      el('pdf-avg').textContent=list.length+' book'+(list.length>1?'s':'')+' · average progress '+Math.round(sum/list.length)+'%';
+    }).catch(function(e){ box.innerHTML='<div class="hint">Could not read storage on this device.</div>'; });
+  }
+
+  /* ---- pdf.js loader (cached after first use) ---- */
+  var pdfjsP=null;
+  function loadPdfJs(){
+    if(pdfjsP) return pdfjsP;
+    pdfjsP=new Promise(function(res,rej){
+      if(window.pdfjsLib){ res(window.pdfjsLib); return; }
+      var srcs=['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+                'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js'];
+      var i=0;
+      (function next(){
+        if(i>=srcs.length){ rej(new Error('pdf engine unavailable')); return; }
+        var sc=document.createElement('script'); sc.src=srcs[i++];
+        sc.onload=function(){
+          if(!window.pdfjsLib){ next(); return; }
+          try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }catch(e){}
+          res(window.pdfjsLib);
+        };
+        sc.onerror=next; document.head.appendChild(sc);
+      })();
+    });
+    return pdfjsP;
+  }
+
+  var CURB=null, DOC=null, RENDERING=false;
+  function showOverlay(on){ el('pdfOverlay').classList.toggle('on',!!on); }
+
+  function render(){
+    if(!DOC||!CURB) return;
+    var pageNo=CURB.page||1;
+    if(pageNo<1) pageNo=1; if(pageNo>DOC.numPages) pageNo=DOC.numPages; CURB.page=pageNo;
+    RENDERING=true;
+    DOC.getPage(pageNo).then(function(pg){
+      var wrap=el('pdfWrap'), cv=el('pdfCv');
+      var vw=Math.max(280, Math.min(wrap.clientWidth-16, 900));
+      var base=pg.getViewport({scale:1});
+      var scale=vw/base.width;
+      var vp=pg.getViewport({scale:scale});
+      var dpr=Math.min(2,window.devicePixelRatio||1);
+      cv.width=Math.floor(vp.width*dpr); cv.height=Math.floor(vp.height*dpr);
+      cv.style.width=vp.width+'px'; cv.style.height=vp.height+'px';
+      var ctx=cv.getContext('2d');
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      return pg.render({canvasContext:ctx,viewport:vp}).promise;
+    }).then(function(){
+      RENDERING=false;
+      var p=pctOf(CURB);
+      el('pdfPos').textContent='Page '+CURB.page+' of '+DOC.numPages+' · '+p+'%';
+      el('pdfProg').firstElementChild.style.width=p+'%';
+      el('pdfPrev').disabled=CURB.page<=1;
+      el('pdfNext').disabled=CURB.page>=DOC.numPages;
+      el('pdfFinish').textContent=CURB.done?'✓ Finished':'✓ Finish';
+      put(CURB).then(function(){ paint(); });
+      el('pdfWrap').scrollTop=0;
+    }).catch(function(){ RENDERING=false; toastLocal('Could not draw this page.'); });
+  }
+
+  function openBook(id){
+    get(id).then(function(b){
+      if(!b){ toastLocal('Book not found.'); return; }
+      CURB=b; DOC=null;
+      el('pdfTtl').textContent=b.name; el('pdfPos').textContent='Loading…';
+      showOverlay(true);
+      loadPdfJs().then(function(lib){
+        return b.blob.arrayBuffer().then(function(buf){
+          return lib.getDocument({data:buf}).promise;
+        });
+      }).then(function(doc){
+        DOC=doc;
+        if(!CURB.pages){ CURB.pages=doc.numPages; }
+        if(!CURB.page||CURB.page<1) CURB.page=1;
+        render();
+      }).catch(function(e){
+        el('pdfPos').textContent='Could not open this PDF';
+        toastLocal('This PDF could not be opened. Try another file.');
+      });
+    });
+  }
+  window.wcOpenPdf=openBook;
+
+  function addFiles(files){
+    var arr=[].slice.call(files||[]).filter(function(f){ return f && (/\.pdf$/i.test(f.name)||f.type==='application/pdf'); });
+    if(!arr.length){ toastLocal('Please choose a PDF file.'); return; }
+    var i=0;
+    (function next(){
+      if(i>=arr.length){ paint(); toastLocal('Added '+arr.length+' PDF'+(arr.length>1?'s':'')+'.'); return; }
+      var f=arr[i++];
+      var b={ id:'p'+Date.now()+'_'+Math.random().toString(36).slice(2,7), name:f.name.replace(/\.pdf$/i,''), size:f.size, added:Date.now(), page:1, pages:0, done:false, blob:f };
+      put(b).then(next).catch(function(){ toastLocal('Could not save that file.'); });
+    })();
+  }
+
+  function wire(){
+    var fab=document.getElementById('pdfFab');if(fab&&!fab.dataset.w){fab.dataset.w='1';fab.onclick=function(){document.getElementById('pdfLib').classList.add('on');paint();};}var lx=document.getElementById('pdfLibX');if(lx&&!lx.dataset.w){lx.dataset.w='1';lx.onclick=function(){document.getElementById('pdfLib').classList.remove('on');};}
+    var add=el('pdf-add'), fi=el('pdf-file');
+    if(add&&fi&&!add.dataset.w){ add.dataset.w='1';
+      add.onclick=function(){ fi.click(); };
+      fi.onchange=function(){ addFiles(fi.files); fi.value=''; };
+    }
+    var x=el('pdfX'); if(x&&!x.dataset.w){ x.dataset.w='1'; x.onclick=function(){ showOverlay(false); }; }
+    var pv=el('pdfPrev'); if(pv&&!pv.dataset.w){ pv.dataset.w='1'; pv.onclick=function(){ if(!CURB||RENDERING) return; if(CURB.page>1){ CURB.page--; render(); } }; }
+    var nx=el('pdfNext'); if(nx&&!nx.dataset.w){ nx.dataset.w='1'; nx.onclick=function(){ if(!CURB||RENDERING) return; if(DOC&&CURB.page<DOC.numPages){ CURB.page++; render(); } }; }
+    var fin=el('pdfFinish'); if(fin&&!fin.dataset.w){ fin.dataset.w='1'; fin.onclick=function(){
+        if(!CURB) return;
+        if(CURB.done){ CURB.done=false; CURB.page=1; toastLocal('Starting again from page 1.'); }
+        else { CURB.done=true; CURB.page=DOC?DOC.numPages:CURB.page; toastLocal('Marked as finished. Well done.'); }
+        put(CURB).then(function(){ paint(); if(DOC) render(); });
+    }; }
+    if(!wire.done){ wire.done=1; paint(); }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(wire,900); });
+  window.addEventListener('load', function(){ setTimeout(wire,300); });
+  setInterval(function(){ if(el('pdf-add') && !el('pdf-add').dataset.w) wire(); }, 1500);
+  window.WCPDF={addFiles:addFiles,paint:paint,open:openBook,_all:all};
+})();
+</script>
+<div id="pdfLib"><div class="rd-top"><button class="iconbtn" id="pdfLibX">←</button><div class="t">My PDF library</div></div><div class="card" id="pdfCard">
+      <label style="margin-top:0">My PDF library</label>
+      <div class="avg" id="pdf-avg">Upload any PDF. It stays on this device and remembers exactly where you stopped.</div>
+      <input type="file" id="pdf-file" accept="application/pdf,.pdf" multiple style="display:none">
+      <button class="btn" id="pdf-add" style="width:100%">⬆️ Add PDFs from my device</button>
+      <div id="pdf-mine" style="margin-top:12px"></div>
+    </div></div><button id="pdfFab" title="My PDF library">📄</button></body>
 </html>
